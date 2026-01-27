@@ -24,6 +24,8 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 - `core/lenses.py` — observer interfaces and simple projections
 - `core/hil.py` — human-friendly naming wrappers
 - `core/decider.py` — decision helpers for common manifolds (z=xy, z=x/y, z=xy^2, m=xyz)
+- `core/sampling.py` — grid/random sampling helpers and budget guard
+- `core/transforms.py` — affine translate/scale wrappers for definitions
 - `core/fibonacci.py` — Fibonacci helpers compatible with substrates
 - `core/tests/` — test suite
 
@@ -32,10 +34,12 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 	- Implicit/parametric substrate spawning
 	- φ-cycle generation and scaled spawning
 	- Lens projections (identity, stats)
+	- Aggregation lens (min/max/mean/var)
 	- Human Interface Layer wrappers
 	- Domain-specific lenses (color, wind velocity, DAL stocks, music, TSP with O(n^2) heuristic)
 	- Fibonacci utilities
 	- Decision helpers and decision-tree substrate
+	- Sampling helpers, budget guard, affine transforms
 
 ## Recent actions
 - Added Human Interface Layer wrappers (`core/hil.py`).
@@ -43,6 +47,7 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 - Updated README and .gitignore.
 - Added benchmarks (`benchmarks/bench.py`) and recorded results in `BENCHMARK.md`.
 - Added decision helpers (`core/decider.py`) and tests.
+- Added sampling helpers, affine transforms, and aggregation lens.
 
 ## Contribution guide (source of truth)
 - Treat the kernel primitives in `core/substrates.py` as the contract: equations are implicit or parametric; sampling is via `spawn_substrate`; lenses are observers that do not mutate substrates.

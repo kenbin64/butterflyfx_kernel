@@ -15,7 +15,9 @@ from core.decider import (
     def_z_xy2,
 )
 from core.hil import HumanDimensionalState, NamedLens, NamedSubstrate, humanize_state, name_lens, name_substrate
-from core.lenses import IdentityLens, StatsLens, Lens
+from core.lenses import AggregationLens, IdentityLens, StatsLens, Lens
+from core.sampling import enforce_budget, grid_params, random_params
+from core.transforms import scale_definition, translate_definition
 from core.substrates import (
     DimensionalState,
     Equation,
@@ -216,6 +218,33 @@ class TestGenerativeKernel(unittest.TestCase):
         coords_tree = {one.coord for one in tree_sub.ones}
         self.assertIn((1.0, 2.0, 2.0), coords_tree)
         self.assertIn((2.0, 2.0, 4.0), coords_tree)
+
+    def test_sampling_utils_and_budget(self):
+        params = grid_params([(0, 1), (0, 1)], step=1)
+        self.assertEqual(len(params), 4)
+
+        rparams = random_params([(0, 1)], count=5, rng=lambda: 0.5)
+        self.assertEqual(rparams, [[0.5]] * 5)
+
+        limited = enforce_budget([1, 2, 3, 4], max_count=2)
+        self.assertEqual(limited, [1, 2])
+
+    def test_affine_transforms_and_aggregation(self):
+        base = SubstrateDefinition(dim=1, equation=Equation.parametric(lambda u: [u[0]]))
+        shifted = translate_definition(base, [2])
+        scaled = scale_definition(base, 3)
+
+        sub_shift = spawn_substrate(shifted, bounds=[(0, 1)], step=1)
+        sub_scale = spawn_substrate(scaled, bounds=[(0, 1)], step=1)
+
+        self.assertIn((2.0,), {o.coord for o in sub_shift.ones})
+        self.assertIn((3.0,), {o.coord for o in sub_scale.ones})
+
+        # aggregation lens on combined substrate
+        lens = AggregationLens()
+        agg = lens.project(sub_scale)
+        self.assertEqual(agg["min"], (0.0,))
+        self.assertEqual(agg["max"], (3.0,))
 
 
 if __name__ == "__main__":

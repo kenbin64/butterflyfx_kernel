@@ -43,4 +43,31 @@ class StatsLens(Lens[dict]):
         }
 
 
-__all__ = ["Lens", "IdentityLens", "StatsLens"]
+class AggregationLens(Lens[dict]):
+    """Computes min, max, mean, and variance per dimension."""
+
+    def project(self, sub: Substrate) -> dict:
+        if not sub.ones:
+            return {"count": 0, "min": (), "max": (), "mean": (), "var": ()}
+
+        dims = len(sub.ones[0].coord)
+        coords = [one.coord for one in sub.ones]
+        mins = [min(c[i] for c in coords) for i in range(dims)]
+        maxs = [max(c[i] for c in coords) for i in range(dims)]
+        means = [sum(c[i] for c in coords) / len(coords) for i in range(dims)]
+
+        variances = []
+        for i in range(dims):
+            mean_i = means[i]
+            variances.append(sum((c[i] - mean_i) ** 2 for c in coords) / len(coords))
+
+        return {
+            "count": len(coords),
+            "min": tuple(mins),
+            "max": tuple(maxs),
+            "mean": tuple(means),
+            "var": tuple(variances),
+        }
+
+
+__all__ = ["Lens", "IdentityLens", "StatsLens", "AggregationLens"]
