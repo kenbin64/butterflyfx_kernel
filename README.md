@@ -23,6 +23,7 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 - `core/substrates.py` — generative kernel + φ recursion
 - `core/lenses.py` — observer interfaces and simple projections
 - `core/hil.py` — human-friendly naming wrappers
+- `core/decider.py` — decision helpers for common manifolds (z=xy, z=x/y, z=xy^2, m=xyz)
 - `core/fibonacci.py` — Fibonacci helpers compatible with substrates
 - `core/tests/` — test suite
 

@@ -6,6 +6,14 @@ from core.fibonacci import (
     fibonacci_directional_operations,
     fibonacci_sequence,
 )
+from core.decider import (
+    choose_definition,
+    decision_tree_substrate,
+    def_m_xyz,
+    def_z_x_over_y,
+    def_z_xy,
+    def_z_xy2,
+)
 from core.hil import HumanDimensionalState, NamedLens, NamedSubstrate, humanize_state, name_lens, name_substrate
 from core.lenses import IdentityLens, StatsLens, Lens
 from core.substrates import (
@@ -182,6 +190,32 @@ class TestGenerativeKernel(unittest.TestCase):
         self.assertEqual(wind["speeds"][0], math.hypot(0.0, 1.0))
         self.assertEqual(tsp["complexity"], "O(n^2)")
         self.assertAlmostEqual(tsp["length"], tsp["length"])  # sanity: numeric
+
+    def test_decider_helpers_and_choice(self):
+        # Prefer parametric by default
+        sub_def = choose_definition("z_xy", prefer_parametric=True)
+        substrate = spawn_substrate(sub_def, bounds=[(0, 1), (0, 1)], step=1)
+        coords = {one.coord for one in substrate.ones}
+        self.assertIn((1.0, 1.0, 1.0), coords)
+
+        # Implicit selection
+        sub_def_i = choose_definition("z_xy", prefer_parametric=False)
+        substrate_i = spawn_substrate(sub_def_i, bounds=[(0, 1), (0, 1), (0, 1)], step=1)
+        coords_i = {one.coord for one in substrate_i.ones}
+        self.assertIn((1.0, 1.0, 1.0), coords_i)
+
+        # Other helpers
+        defs = [def_z_x_over_y(), def_z_xy2(), def_m_xyz()]
+        for d in defs:
+            self.assertIsInstance(d, SubstrateDefinition)
+
+        # Decision-tree-as-substrate
+        tree_def = decision_tree_substrate(score=2.0, prefer_parametric=True)
+        tree_sub = spawn_substrate(tree_def, bounds=[(1, 2), (1, 1)], step=1)
+        # z = x*y*score => for x=1..2, y=1 => z=2,4
+        coords_tree = {one.coord for one in tree_sub.ones}
+        self.assertIn((1.0, 2.0, 2.0), coords_tree)
+        self.assertIn((2.0, 2.0, 4.0), coords_tree)
 
 
 if __name__ == "__main__":
