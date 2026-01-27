@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include NOTICE
+include BENCHMARK.md
+recursive-include core *.py
+recursive-exclude core *.pyc
+recursive-exclude core __pycache__
+prune benchmarks
+prune core/tests
