@@ -28,3 +28,7 @@ Thumbs.db
 # Environment variables / secrets
 .env
 *.env
+
+# Apps directory (separate repos built on the kernel)
+apps/
+apps_*/
