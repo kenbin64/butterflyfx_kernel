@@ -39,6 +39,7 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 - Added Human Interface Layer wrappers (`core/hil.py`).
 - Implemented domain-specific lens examples and tests (color, wind, stocks, music, TSP).
 - Updated README and .gitignore.
+- Added benchmarks (`benchmarks/bench.py`) and recorded results in `BENCHMARK.md`.
 
 ## License
 Proprietary (specify if different).
