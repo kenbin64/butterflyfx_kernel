@@ -16,3 +16,6 @@ Average seconds per run (PowerShell, Windows):
 Notes:
 - Benchmarks sample implicit/parametric spawning and a stats lens projection.
 - PYTHONPATH set to project root to import local packages.
+- Additional comparison (z = x*y): implicit vs parametric sampling over x,y∈[0,10], step=1
+	- implicit_z_eq_xy: ~0.0080s, 121 ones
+	- parametric_z_eq_xy: ~0.0001s, 121 ones (avoids 3D grid membership test)
