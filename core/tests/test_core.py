@@ -1,3 +1,4 @@
+import math
 import unittest
 
 from core.fibonacci import (
@@ -6,7 +7,7 @@ from core.fibonacci import (
     fibonacci_sequence,
 )
 from core.hil import HumanDimensionalState, NamedLens, NamedSubstrate, humanize_state, name_lens, name_substrate
-from core.lenses import IdentityLens, StatsLens
+from core.lenses import IdentityLens, StatsLens, Lens
 from core.substrates import (
     DimensionalState,
     Equation,
@@ -122,6 +123,65 @@ class TestGenerativeKernel(unittest.TestCase):
         self.assertEqual(named_lens.name, "Identity")
         self.assertEqual(named_lens.description, "Pass-through")
         self.assertIs(named_lens.lens, lens)
+
+    def test_domain_specific_lenses(self):
+        # Parametric substrate yields three sample points
+        defn = SubstrateDefinition(dim=1, equation=Equation.parametric(lambda u: [u[0], 1 - u[0]]))
+        substrate = spawn_substrate(defn, bounds=[(0, 2)], step=1.0)
+
+        class ColorLens(Lens[dict]):
+            def project(self, sub):
+                colors = ["red" if one.coord[0] >= 1 else "blue" for one in sub.ones]
+                return {"colors": tuple(colors)}
+
+        class WindLens(Lens[dict]):
+            def project(self, sub):
+                speeds = [math.hypot(*one.coord[:2]) for one in sub.ones]
+                return {"speeds": tuple(speeds)}
+
+        class StockLens(Lens[dict]):
+            def project(self, sub):
+                prices = [100 + one.coord[0] * 10 for one in sub.ones]
+                return {"ticker": "DAL", "prices": tuple(prices)}
+
+        class MusicLens(Lens[dict]):
+            def project(self, sub):
+                freqs = [440 + one.coord[0] * 10 for one in sub.ones]
+                return {"frequencies": tuple(freqs)}
+
+        class TSPLens(Lens[dict]):
+            def project(self, sub):
+                # Simple nearest-neighbor length with closure; O(n^2) traversal
+                coords = [one.coord for one in sub.ones]
+                if not coords:
+                    return {"route": (), "length": 0.0, "complexity": "O(1)"}
+                remaining = coords[1:]
+                route = [coords[0]]
+                length = 0.0
+                current = coords[0]
+                while remaining:
+                    nearest = min(remaining, key=lambda c: math.hypot(c[0] - current[0], c[1] - current[1]))
+                    length += math.hypot(nearest[0] - current[0], nearest[1] - current[1])
+                    route.append(nearest)
+                    remaining.remove(nearest)
+                    current = nearest
+                # close tour
+                length += math.hypot(route[0][0] - current[0], route[0][1] - current[1])
+                return {"route": tuple(route), "length": length, "complexity": "O(n^2)"}
+
+        color = ColorLens().project(substrate)
+        wind = WindLens().project(substrate)
+        stock = StockLens().project(substrate)
+        music = MusicLens().project(substrate)
+        tsp = TSPLens().project(substrate)
+
+        self.assertEqual(color["colors"], ("blue", "red", "red"))
+        self.assertEqual(stock["ticker"], "DAL")
+        self.assertEqual(stock["prices"], (100.0, 110.0, 120.0))
+        self.assertEqual(music["frequencies"], (440.0, 450.0, 460.0))
+        self.assertEqual(wind["speeds"][0], math.hypot(0.0, 1.0))
+        self.assertEqual(tsp["complexity"], "O(n^2)")
+        self.assertAlmostEqual(tsp["length"], tsp["length"])  # sanity: numeric
 
 
 if __name__ == "__main__":

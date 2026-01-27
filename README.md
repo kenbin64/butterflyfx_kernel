@@ -26,5 +26,19 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 - `core/fibonacci.py` — Fibonacci helpers compatible with substrates
 - `core/tests/` — test suite
 
+## Tests performed
+- `python -m pytest`
+	- Implicit/parametric substrate spawning
+	- φ-cycle generation and scaled spawning
+	- Lens projections (identity, stats)
+	- Human Interface Layer wrappers
+	- Domain-specific lenses (color, wind velocity, DAL stocks, music, TSP with O(n^2) heuristic)
+	- Fibonacci utilities
+
+## Recent actions
+- Added Human Interface Layer wrappers (`core/hil.py`).
+- Implemented domain-specific lens examples and tests (color, wind, stocks, music, TSP).
+- Updated README and .gitignore.
+
 ## License
 Proprietary (specify if different).
