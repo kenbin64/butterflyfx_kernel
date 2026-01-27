@@ -1,0 +1,12 @@
+ButterflyFX Kernel
+Copyright (c) 2026 Kenneth Bingham and Contributors
+
+This software is licensed under the MIT License.
+See the LICENSE file for the full license text.
+
+This kernel is pure mathematical abstraction and remains free and open source
+under the MIT License. Derivative works and applications may use any license,
+but must retain the MIT license notice for the core kernel components.
+
+The kernel is designed to be free from single-entity control. Multiple
+maintainers are encouraged to ensure the project's longevity and independence.

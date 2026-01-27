@@ -1,5 +1,7 @@
 # ButterflyFX Kernel
 
+**MIT Licensed Open Source**
+
 Generative substrate-of-substrates kernel with φ-recursion, human interface wrappers, and observer lenses. Pure equation-driven manifolds—no hard-coded shapes.
 
 ## Features
@@ -10,13 +12,50 @@ Generative substrate-of-substrates kernel with φ-recursion, human interface wra
 - Fibonacci utilities adapted to substrates
 - Comprehensive tests in `core/tests/test_core.py`
 
-## Quick start
-```bash
-# activate the env (example)
-C:/projects/butterfly/conduit/.venv/Scripts/Activate.ps1
+## Installation
 
-# run tests
-C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
+### From source (for development)
+```bash
+git clone https://github.com/kenbin64/butterflyfx_kernel.git
+cd butterflyfx_kernel
+pip install -e .
+```
+
+### As a dependency in your app
+```bash
+# Once published to PyPI:
+pip install butterflyfx-kernel
+
+# Or from git:
+pip install git+https://github.com/kenbin64/butterflyfx_kernel.git
+```
+
+## Quick start
+
+### Using the package
+```python
+from core import Equation, SubstrateDefinition, spawn_substrate
+from core.lenses import StatsLens
+
+# Define a parametric manifold
+defn = SubstrateDefinition(
+    dim=2,
+    equation=Equation.parametric(lambda u: [u[0], u[1], u[0] * u[1]])
+)
+
+# Spawn and observe
+substrate = spawn_substrate(defn, bounds=[(0, 10), (0, 10)], step=1)
+stats = StatsLens().project(substrate)
+print(f"Sampled {stats['count']} points")
+```
+
+### Development
+```bash
+# Run tests
+pytest
+
+# Or with the full path (without package install):
+python -m pytest
 ```
 
 ## Repository structure
@@ -59,5 +98,22 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 - Keep tests authoritative: new functionality should extend `core/tests/test_core.py` (or new test modules) to lock behavior.
 - Benchmarks are informational; align new performance experiments with `benchmarks/` scripts.
 
-## License
-Proprietary (specify if different).
+## License & Governance
+
+### License
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+The ButterflyFX Kernel is pure mathematical abstraction and remains **free and open source**. Applications built on top of the kernel may use any license, but must retain the MIT license attribution for the core components.
+
+### Governance
+- The kernel is designed to be **free from single-entity control**.
+- Multi-maintainer governance with branch protections and code review requirements.
+- Contributions are welcome via pull requests with tests and documentation.
+- See [NOTICE](NOTICE) for attribution and stewardship details.
+
+### Using in Proprietary Applications
+You may use this MIT-licensed kernel in proprietary applications without restriction. Simply:
+1. Include the MIT license text and copyright notice from this project.
+2. Install the kernel as a dependency rather than copying source code.
+3. Your application code can remain closed-source and under any license you choose.
+

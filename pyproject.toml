@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "butterflyfx-kernel"
+version = "0.1.0"
+description = "Generative substrate-of-substrates kernel with φ-recursion and observer lenses"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Kenneth Bingham", email = "ken.bingham64@gmail.com"}
+]
+maintainers = [
+    {name = "Kenneth Bingham", email = "ken.bingham64@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["substrate", "manifold", "fibonacci", "phi", "golden-ratio", "lens", "observer"]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/kenbin64/butterflyfx_kernel"
+Repository = "https://github.com/kenbin64/butterflyfx_kernel"
+Issues = "https://github.com/kenbin64/butterflyfx_kernel/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*"]
+exclude = ["core.tests*", "benchmarks*"]
+
+[tool.pytest.ini_options]
+testpaths = ["core/tests"]
+python_files = ["test_*.py"]
