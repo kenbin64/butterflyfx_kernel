@@ -30,6 +30,12 @@ pip install butterflyfx-kernel
 pip install git+https://github.com/kenbin64/butterflyfx_kernel.git
 ```
 
+## Documentation
+
+- **[Basics Guide](docs/BASICS.md)** - Friendly introduction for everyone
+- **[Developer API](docs/API.md)** - Complete technical reference
+- **[AI Directive](docs/AI_DIRECTIVE.md)** - Guidance for AI assistants
+
 ## Quick start
 
 ### Using the package
