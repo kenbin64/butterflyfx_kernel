@@ -26,6 +26,7 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 - `core/decider.py` — decision helpers for common manifolds (z=xy, z=x/y, z=xy^2, m=xyz)
 - `core/sampling.py` — grid/random sampling helpers and budget guard
 - `core/transforms.py` — affine translate/scale wrappers for definitions
+- `core/phi_lens.py` — optional phi-cycle lenses (per-step and full cycle)
 - `core/fibonacci.py` — Fibonacci helpers compatible with substrates
 - `core/tests/` — test suite
 
@@ -40,6 +41,7 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 	- Fibonacci utilities
 	- Decision helpers and decision-tree substrate
 	- Sampling helpers, budget guard, affine transforms
+	- Phi step/cycle lenses
 
 ## Recent actions
 - Added Human Interface Layer wrappers (`core/hil.py`).
@@ -48,6 +50,7 @@ C:/projects/butterfly/conduit/.venv/Scripts/python.exe -m pytest
 - Added benchmarks (`benchmarks/bench.py`) and recorded results in `BENCHMARK.md`.
 - Added decision helpers (`core/decider.py`) and tests.
 - Added sampling helpers, affine transforms, and aggregation lens.
+- Added phi-cycle lenses.
 
 ## Contribution guide (source of truth)
 - Treat the kernel primitives in `core/substrates.py` as the contract: equations are implicit or parametric; sampling is via `spawn_substrate`; lenses are observers that do not mutate substrates.

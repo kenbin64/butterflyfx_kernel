@@ -18,6 +18,7 @@ from core.hil import HumanDimensionalState, NamedLens, NamedSubstrate, humanize_
 from core.lenses import AggregationLens, IdentityLens, StatsLens, Lens
 from core.sampling import enforce_budget, grid_params, random_params
 from core.transforms import scale_definition, translate_definition
+from core.phi_lens import PhiCycleLens, PhiStepLens
 from core.substrates import (
     DimensionalState,
     Equation,
@@ -245,6 +246,20 @@ class TestGenerativeKernel(unittest.TestCase):
         agg = lens.project(sub_scale)
         self.assertEqual(agg["min"], (0.0,))
         self.assertEqual(agg["max"], (3.0,))
+
+    def test_phi_step_and_cycle_lenses(self):
+        defn = SubstrateDefinition(dim=1, equation=Equation.parametric(lambda u: [u[0]]))
+        # step lens
+        step_lens = PhiStepLens(step_index=1, projector=IdentityLens(), bounds=[(0, 0)], step=1)
+        res = step_lens.project(defn)
+        self.assertEqual(res["step"], 1)
+        self.assertIn("projection", res)
+
+        # cycle lens with stats
+        cycle_lens = PhiCycleLens(projector=StatsLens(), bounds=[(0, 0)], step=1, include_collapse=False)
+        res_cycle = cycle_lens.project(defn)
+        self.assertEqual(len(res_cycle), 33)
+        self.assertEqual(res_cycle[0]["step"], 1)
 
 
 if __name__ == "__main__":
