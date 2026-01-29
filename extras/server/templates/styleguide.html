@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Style Guide{% endblock %}
+{% block content %}
+  <h1>Style Guide</h1>
+  <p class="muted">Design tokens, components, and layout guidance for ButterflyFX pages.</p>
+
+  <h3>Navigation</h3>
+  <p>The top nav holds informational and auth actions; the side panel is used for app navigation and links.</p>
+
+  <h3>Login behavior</h3>
+  <p>One login grants access to all Butterfly apps via the universal connector — implement SSO/session tokens at the server layer.</p>
+
+  <h3>Tokens</h3>
+  <ul>
+    <li>Accent gradient: cyan → purple → gold</li>
+    <li>Panels: semi-transparent dark surfaces with glowing wireframe border</li>
+  </ul>
+{% endblock %}

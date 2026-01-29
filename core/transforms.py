@@ -1,58 +1,80 @@
-"""Affine transform helpers for substrate definitions."""
+# core/transform.py
+"""
+Canonical substrate: z = x * y^2 and vectorized spawn logic.
+
+- z_xy2_parametric() returns a SubstrateDefinition with a parametric g.
+- spawn_substrate_vectorized() evaluates g over a grid in chunks and returns
+  a Substrate (materializing One objects only at the end).
+"""
 
 from __future__ import annotations
+from typing import Sequence, Tuple, Optional
+import numpy as np
+from .substrates import SubstrateDefinition, Equation, Substrate, One
+from .sampling import grid_params_generator, chunked
 
-from typing import Iterable, Sequence
+def z_xy2_parametric() -> SubstrateDefinition:
+    """
+    Parametric definition for z = x * y^2.
 
-from core.substrates import Equation, Scalar, SubstrateDefinition
-
-
-def _normalize_factors(factors: Scalar | Sequence[Scalar], dim: int) -> list[Scalar]:
-    if isinstance(factors, (int, float)):
-        return [float(factors)] * dim
-    if len(factors) < dim:
-        raise ValueError("Not enough scale factors for dimensions")
-    return [float(x) for x in factors[:dim]]
-
-
-def translate_definition(defn: SubstrateDefinition, offsets: Sequence[Scalar]) -> SubstrateDefinition:
-    offs = list(offsets)
-    if len(offs) < defn.dim:
-        raise ValueError("Offset length must match dimension")
-
-    if defn.equation.kind == "parametric":
-        if defn.equation.g is None:
-            raise ValueError("Parametric equation missing g")
-        return SubstrateDefinition(
-            dim=defn.dim,
-            equation=Equation.parametric(lambda u, g=defn.equation.g: [g(u)[i] + offs[i] for i in range(defn.dim)]),
-        )
-
-    if defn.equation.f is None:
-        raise ValueError("Implicit equation missing f")
-    return SubstrateDefinition(
-        dim=defn.dim,
-        equation=Equation.implicit(lambda p, f=defn.equation.f: f([p[i] - offs[i] for i in range(defn.dim)])),
-    )
+    The returned g accepts a NumPy array of shape (N,2) and returns (N,3).
+    """
+    def g(u: np.ndarray) -> np.ndarray:
+        # u[:,0] = x, u[:,1] = y
+        x = u[:, 0]
+        y = u[:, 1]
+        z = x * (y ** 2)
+        return np.stack([x, y, z], axis=-1)
+    return SubstrateDefinition(dim=2, equation=Equation.parametric(g))
 
 
-def scale_definition(defn: SubstrateDefinition, factors: Scalar | Sequence[Scalar]) -> SubstrateDefinition:
-    facs = _normalize_factors(factors, defn.dim)
+def spawn_substrate_vectorized(defn: SubstrateDefinition,
+                               bounds: Sequence[Tuple[float, float]],
+                               step: float,
+                               chunk_size: int = 100_000,
+                               max_points: Optional[int] = 5_000_000) -> Substrate:
+    """
+    Evaluate a parametric or implicit substrate over a grid.
 
-    if defn.equation.kind == "parametric":
-        if defn.equation.g is None:
-            raise ValueError("Parametric equation missing g")
-        return SubstrateDefinition(
-            dim=defn.dim,
-            equation=Equation.parametric(lambda u, g=defn.equation.g: [g(u)[i] * facs[i] for i in range(defn.dim)]),
-        )
+    - defn: SubstrateDefinition (parametric preferred)
+    - bounds: sequence of (min, max) pairs, one per parameter
+    - step: sampling increment
+    - chunk_size: number of parameter vectors evaluated per batch
+    - max_points: safety guard to avoid runaway memory usage
 
-    if defn.equation.f is None:
-        raise ValueError("Implicit equation missing f")
-    return SubstrateDefinition(
-        dim=defn.dim,
-        equation=Equation.implicit(lambda p, f=defn.equation.f: f([p[i] / facs[i] if facs[i] != 0 else 0 for i in range(defn.dim)])),
-    )
+    Returns a Substrate with One objects for each sampled coordinate.
+    """
+    coords_parts = []
+    total = 0
+    gen = grid_params_generator(bounds, step)
 
+    # Evaluate in batches to limit memory
+    for batch in chunked(gen, chunk_size):
+        arr = np.asarray(batch, dtype=float)  # shape (M, dim)
+        if defn.equation.kind == "parametric":
+            # Vectorized parametric mapping
+            g = defn.equation.g
+            mapped = g(arr)  # expected shape (M, D_out)
+            coords_parts.append(mapped)
+            total += mapped.shape[0]
+            if max_points and total > max_points:
+                raise MemoryError("Exceeded max_points budget in spawn_substrate_vectorized")
+        else:
+            # Implicit: evaluate f per parameter vector and select zeros
+            f = defn.equation.f
+            vals = np.array([f(row.tolist()) for row in arr])
+            mask = np.abs(vals) < 1e-9
+            coords_parts.append(arr[mask])
+            total += int(mask.sum())
+            if max_points and total > max_points:
+                raise MemoryError("Exceeded max_points budget in spawn_substrate_vectorized")
 
-__all__ = ["translate_definition", "scale_definition"]
+    # Concatenate results and materialize One objects
+    if coords_parts:
+        coords = np.vstack(coords_parts)
+    else:
+        coords = np.empty((0, defn.dim + 1))
+
+    # Convert rows to One objects (tuple coords)
+    ones = tuple(One(coord=tuple(row)) for row in coords)
+    return Substrate(defn=defn, ones=ones)

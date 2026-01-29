@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ButterflyFX — Style Guide</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <style>
+      .example{margin:1rem 0}
+      .row{display:flex;gap:1rem;align-items:center}
+    </style>
+  </head>
+  <body>
+    <div class="top-nav">
+      <div class="brand"><strong>ButterflyFX</strong></div>
+      <div class="nav-actions">
+        <button class="btn btn-ghost">Register</button>
+        <button class="btn btn-primary">Log in</button>
+      </div>
+    </div>
+
+    <div class="app-layout">
+      <aside class="side-panel">
+        <nav>
+          <h4>Butterfly</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/static/benefits.html">Why ButterflyFX</a></li>
+            <li><a href="/static/sitemap.html">Sitemap</a></li>
+            <li><a href="/downloads/butterflyfx-extension.zip">Downloads</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-area">
+        <h1>Style Guide</h1>
+        <p class="muted">Design tokens, components, and layout guidance for all ButterflyFX pages.</p>
+
+        <section class="example">
+          <h3>Colors & Tokens</h3>
+          <p>Use gradient accents <span class="kbd">--accent-1</span> to <span class="kbd">--accent-2</span> for primary CTAs. Background and text tokens are available in <code>:root</code>.</p>
+        </section>
+
+        <section class="example">
+          <h3>Navigation</h3>
+          <p>Top nav is informational and holds authentication controls. The side panel is the primary site navigation for Butterfly apps.</p>
+          <div class="row">
+            <button class="btn btn-ghost">Register</button>
+            <button class="btn btn-primary">Log in</button>
+          </div>
+        </section>
+
+        <section class="example">
+          <h3>Login behavior</h3>
+          <p>One login grants access to all Butterfly apps via the universal connector. Implement SSO/session tokens at the server layer; the UI shows/hides the side panel options after login.</p>
+        </section>
+
+        <section class="example">
+          <h3>Components</h3>
+          <div class="card">
+            <p><strong>Card</strong> — use for concise content blocks.</p>
+          </div>
+        </section>
+
+        <section class="example">
+          <h3>Layout notes</h3>
+          <ul>
+            <li>Keep side panel narrow (240–280px) with compact links to apps.</li>
+            <li>Top nav must remain minimal and accessible on small screens.</li>
+            <li>Login modal should be centered with an overlay; use progressive disclosure for scopes and permissions.</li>
+          </ul>
+        </section>
+
+        <footer style="margin-top:2rem;color:var(--muted)">ButterflyFX — style guide • © 2026</footer>
+      </main>
+    </div>
+  </body>
+</html>
