@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{% block title %}ButterflyFX{% endblock %}</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <script defer src="/static/app_shell.js"></script>
   </head>
-  <body class="bg-starfield">
+  <body class="{{ body_class|default('bg-starfield') }}">
     <div class="bg-galaxy"></div>
     <div class="top-nav">
       <div class="brand">
@@ -16,10 +17,10 @@
         <div class="brand-text">ButterflyFX</div>
       </div>
       <div class="nav-actions">
-        <a class="nav-link" href="/static/styleguide.html">Style Guide</a>
-        <a class="nav-link" href="/static/benefits.html">About</a>
-        <a class="nav-link" href="#">Register</a>
-        <a class="btn btn-primary" href="#">Sign in</a>
+        <a class="nav-link" href="/styleguide" data-nav>Style Guide</a>
+        <a class="nav-link" href="/benefits" data-nav>About</a>
+        <a class="nav-link" href="/register">Register</a>
+        <a class="btn btn-primary" href="/login">Sign in</a>
       </div>
     </div>
 
@@ -27,9 +28,9 @@
       <aside class="side-panel">
         <nav>
           <ul class="side-links">
-            <li><a href="/">🏠 Home</a></li>
-            <li><a href="/static/benefits.html">✨ Why ButterflyFX</a></li>
-            <li><a href="/static/sitemap.html">🗺️ Sitemap</a></li>
+            <li><a href="/" data-nav>🏠 Home</a></li>
+            <li><a href="/benefits" data-nav>✨ Why ButterflyFX</a></li>
+            <li><a href="/sitemap" data-nav>🗺️ Sitemap</a></li>
             <li><a href="/downloads/butterflyfx-extension.zip">⬇️ Downloads</a></li>
             <li><a href="https://theconduit.me" target="_blank">🔗 The Conduit</a></li>
           </ul>
@@ -38,10 +39,22 @@
 
       <main class="main-area">
         <div class="panel card">
-          {% block content %}{% endblock %}
+          <div class="deck" data-deck>
+            <section class="view-card is-active" data-view aria-live="polite" aria-atomic="true">
+              {% block content %}{% endblock %}
+            </section>
+          </div>
         </div>
       </main>
     </div>
+
+    <nav class="bottom-nav" aria-label="Primary">
+      <a href="/" data-nav>Home</a>
+      <a href="/benefits" data-nav>Why</a>
+      <a href="/sitemap" data-nav>Map</a>
+      <a href="/downloads/butterflyfx-extension.zip">DL</a>
+      <a href="https://theconduit.me" target="_blank">Conduit</a>
+    </nav>
 
     <footer class="muted" style="text-align:center;padding:1rem 0">© ButterflyFX • 2026</footer>
   </body>

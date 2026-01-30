@@ -25,6 +25,21 @@ async def homepage(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+@app.get('/benefits')
+def benefits(request: Request):
+    return templates.TemplateResponse('benefits.html', {"request": request})
+
+
+@app.get('/styleguide')
+def styleguide(request: Request):
+    return templates.TemplateResponse('styleguide.html', {"request": request, "body_class": "bg-starfield styleguide"})
+
+
+@app.get('/sitemap')
+def sitemap(request: Request):
+    return templates.TemplateResponse('sitemap.html', {"request": request})
+
+
 @app.get('/register')
 def register_form(request: Request):
     return templates.TemplateResponse('register.html', {"request": request})
