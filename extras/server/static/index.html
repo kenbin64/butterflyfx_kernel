@@ -1,13 +1,923 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ButterflyFX — Home</title>
-    <meta http-equiv="refresh" content="0; url=/" />
-    <link rel="canonical" href="/" />
-  </head>
-  <body>
-    <p><a href="/">Continue to ButterflyFX</a></p>
-  </body>
+<head>
+<meta charset="UTF-8">
+<title>ButterflyFX – A New Way to See Information</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, #0a0f24, #000814 70%);
+        color: #e8ecf3;
+        overflow-x: hidden;
+        padding-top: 72px;
+    }
+
+    /* Starfield background */
+    canvas#stars {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+    }
+
+    /* Section panels */
+    section {
+        max-width: 900px;
+        margin: 4rem auto;
+        padding: 2.5rem;
+        background: rgba(10, 15, 30, 0.55);
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 0 25px rgba(120, 200, 255, 0.15);
+        animation: fadeUp 1.2s ease;
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h1, h2 {
+        text-align: center;
+        margin-top: 0;
+        color: #8fd3ff;
+        text-shadow: 0 0 12px rgba(0,180,255,0.4);
+    }
+
+    p {
+        font-size: 1.15rem;
+        line-height: 1.7;
+        color: #d7d9e0;
+    }
+
+    .glyph {
+        font-size: 2.2rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        color: #f7c86c;
+        text-shadow: 0 0 10px rgba(255, 200, 120, 0.4);
+    }
+
+    .highlight {
+        color: #9be8ff;
+        font-weight: bold;
+    }
+
+    nav {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    nav a {
+        color: #8fd3ff;
+        margin: 0 1rem;
+        text-decoration: none;
+        font-size: 1.1rem;
+    }
+
+    nav a:hover {
+        text-shadow: 0 0 10px #8fd3ff;
+    }
+
+    /* Top nav */
+    .top-nav {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85rem 1.5rem;
+        background: rgba(5, 10, 25, 0.8);
+        border-bottom: 1px solid rgba(143, 211, 255, 0.25);
+        backdrop-filter: blur(10px);
+    }
+    .top-nav .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #9be8ff;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+    .top-nav .brand .logo {
+        font-size: 1.2rem;
+    }
+    .top-nav .links {
+        display: flex;
+        gap: 1.1rem;
+        align-items: center;
+    }
+    .top-nav a {
+        color: #9be8ff;
+        text-decoration: none;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+    .top-nav a:hover { text-shadow: 0 0 10px #9be8ff; }
+
+    .dropdown {
+        position: relative;
+    }
+    .dropdown-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .dropdown-menu {
+        position: absolute;
+        top: 110%;
+        left: 0;
+        min-width: 180px;
+        background: rgba(5, 10, 25, 0.95);
+        border: 1px solid rgba(143,211,255,0.25);
+        border-radius: 10px;
+        padding: 0.4rem 0;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+        display: none;
+        z-index: 20;
+    }
+    .dropdown-menu a {
+        display: block;
+        padding: 0.45rem 0.9rem;
+        color: #e8ecf3;
+    }
+    .dropdown-menu a:hover { color: #9be8ff; }
+    .dropdown.open .dropdown-menu { display: block; }
+
+    .menu-toggle {
+        display: none;
+        background: rgba(20,30,55,0.9);
+        border: 1px solid rgba(143,211,255,0.35);
+        color: #9be8ff;
+        padding: 0.4rem 0.6rem;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    /* Side nav */
+    .side-nav {
+        position: fixed;
+        left: 18px;
+        top: 120px;
+        z-index: 9;
+        width: 180px;
+        padding: 0.75rem 0.85rem;
+        border-radius: 14px;
+        background: rgba(10, 15, 30, 0.6);
+        border: 1px solid rgba(143, 211, 255, 0.15);
+        backdrop-filter: blur(8px);
+    }
+    .side-nav h4 {
+        margin: 0 0 0.4rem 0;
+        color: #9be8ff;
+        font-size: 0.95rem;
+        letter-spacing: 0.02em;
+    }
+    .side-nav a {
+        display: block;
+        color: #d7d9e0;
+        text-decoration: none;
+        padding: 0.28rem 0.1rem;
+        font-size: 0.95rem;
+    }
+    .side-nav a:hover { color: #9be8ff; text-shadow: 0 0 6px #9be8ff; }
+
+    /* Mobile drawer */
+    .nav-drawer {
+        position: fixed;
+        top: 64px;
+        left: 0; right: 0;
+        z-index: 15;
+        background: rgba(5, 10, 25, 0.92);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(143, 211, 255, 0.2);
+        padding: 0.5rem 1rem 1rem 1rem;
+        display: none;
+    }
+    .nav-drawer.open { display: block; }
+    .nav-drawer a {
+        display: block;
+        padding: 0.45rem 0.2rem;
+        color: #e8ecf3;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .nav-drawer a:hover { color: #9be8ff; text-shadow: 0 0 6px #9be8ff; }
+
+    /* Responsive rules */
+    @media (max-width: 900px) {
+        body { padding-top: 64px; }
+        .top-nav { padding: 0.75rem 1rem; }
+        .top-nav .links { display: none; }
+        .menu-toggle { display: inline-flex; }
+        .side-nav { display: none; }
+        section { margin: 3rem auto; padding: 1.8rem; }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="top-nav">
+    <div class="brand"><span class="logo">🦋</span><span>ButterflyFX</span></div>
+    <div class="links">
+        <a href="developers.html">Developers</a>
+        <div class="dropdown" id="appsDropdown">
+            <a href="#" class="dropdown-toggle" id="appsToggle">Applications ▾</a>
+            <div class="dropdown-menu" id="appsMenu">
+                <a href="apps.html">All Applications</a>
+                <a href="benefits.html">Benefits</a>
+                <a href="styleguide.html">Styleguide</a>
+                <a href="sitemap.html">Sitemap</a>
+            </div>
+        </div>
+        <a href="kernel.html">Kernal</a>
+        <a href="core.html">Core</a>
+    </div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+</div>
+
+<div class="nav-drawer" id="navDrawer">
+    <a href="developers.html">Developers</a>
+    <a href="apps.html">Applications</a>
+    <a href="kernel.html">Kernal</a>
+    <a href="core.html">Core</a>
+    <a href="#hero">Hero</a>
+    <a href="core.html">Core & SRL</a>
+    <a href="#substrait">What is a Substrait</a>
+    <a href="#interactive">Interactive Panel</a>
+    <a href="#glean">How We Glean</a>
+    <a href="#examples">What We Extract</a>
+    <a href="#storage">Storage vs Substrait</a>
+    <a href="#why">Why It Matters</a>
+</div>
+
+<div class="side-nav">
+    <h4>Sections</h4>
+    <a href="#hero">Hero</a>
+    <a href="#substrait">What is a Substrait</a>
+    <a href="#interactive">Interactive Panel</a>
+    <a href="#glean">How We Glean</a>
+    <a href="#examples">What We Extract</a>
+    <a href="#storage">Storage vs Substrait</a>
+    <a href="#why">Why It Matters</a>
+</div>
+
+<canvas id="stars"></canvas>
+
+<!-- HERO -->
+<section id="hero">
+    <div class="glyph">✦</div>
+    <h1>ButterflyFX</h1>
+    <h2>ButterflyFx a small flutter brings out the world.</h2>
+    <p>
+        Data need not be stored; it can be taken from the living rock of geometry—extracted like color from stone, or wavelength from sound, or light from photons. We do not store data; we take it from geometry where it has always existed, merely extracted through any lens of our choosing.
+    </p>
+    <p>
+        ButterflyFx a small flutter brings out the world.
+    </p>
+</section>
+
+<!-- WHAT IS A SUBSTRAIT -->
+<section id="substrait">
+    <div class="glyph">▢</div>
+    <h2>What Is a Substrait?</h2>
+    <p>
+        A substrait is a geometric shape whose contours, angles, and density already carry the data—
+        much like a melody carries emotion or a landscape carries depth.
+    </p>
+    <p>
+        Instead of storing a picture, we keep the shape that can <em>generate</em> the picture.
+        Instead of storing a sound file, we keep the pattern that can <em>produce</em> the sound.
+    </p>
+
+    <!-- VISUAL: Interactive substrait + lens panel -->
+    <div id="interactive" style="margin:2rem auto; text-align:center;">
+        <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; align-items:center; margin-bottom:0.75rem;">
+            <label style="color:#9be8ff;">Substrait
+                <select id="substraitSelect" style="margin-left:0.5rem; padding:0.4rem 0.6rem; border-radius:10px; border:1px solid #8fd3ff55; background:#0f1429; color:#e8ecf3;">
+                    <option value="sine">Sine Wave</option>
+                    <option value="spiral">Spiral Wave</option>
+                    <option value="logistic">Logistic Curve</option>
+                    <option value="zxy">z = x·y</option>
+                    <option value="zxy2">z = x·y²</option>
+                    <option value="musicscale">Musical Scale</option>
+                </select>
+            </label>
+            <label style="color:#ffb86c;">Lens
+                <select id="lensSelect" style="margin-left:0.5rem; padding:0.4rem 0.6rem; border-radius:10px; border:1px solid #ffb86c55; background:#0f1429; color:#e8ecf3;">
+                    <option value="color">Color</option>
+                    <option value="sound">Sound</option>
+                    <option value="vector">Vector</option>
+                    <option value="ascii">ASCII</option>
+                    <option value="note">Music Note</option>
+                </select>
+            </label>
+        </div>
+
+        <div style="position:relative;">
+            <canvas id="substrateCanvas" width="700" height="250" 
+                style="width:100%; border-radius:16px; background:rgba(255,255,255,0.05);">
+            </canvas>
+            <div id="hoverReadout" style="position:absolute; top:10px; left:10px; padding:0.55rem 0.8rem; border-radius:10px; background:rgba(0,0,0,0.55); color:#e8ecf3; font-size:0.95rem; border:1px solid #8fd3ff55; pointer-events:none;">
+                Hover to sample the substrait through a lens
+            </div>
+        </div>
+        <p style="color:#9be8ff; margin-top:0.5rem;">Pick a substrait and lens; hover to see (and hear) the derived value.</p>
+    </div>
+</section>
+
+<!-- CORE & SRL -->
+<section id="core">
+    <div class="glyph">⟡</div>
+    <h2>ButterflyFX Core, SRL & Universal Connector</h2>
+    <p>
+        The artifact is the always-open, always-free heart of ButterflyFX. It ships with the universal connector,
+        SRL (Secure Resource Locator), and a dev library that’s available across major ecosystems.
+    </p>
+    <p>
+        SRL includes a connection table (metadata only) with names and status booleans (connected/disconnected;
+        read/write flags). All PII and credentials are encrypted; the table never exposes secrets—only labels and state.
+    </p>
+
+    <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; align-items:flex-start; margin-top:1rem;">
+        <div style="flex:1 1 260px; padding:1rem 1.25rem; border:1px solid rgba(143,211,255,0.35); border-radius:14px; background:rgba(15,20,41,0.65);">
+            <h3 style="color:#8fd3ff; margin-top:0;">Languages & Packages</h3>
+            <p style="margin:0.3rem 0;">Java: Maven / Gradle</p>
+            <p style="margin:0.3rem 0;">.NET: NuGet</p>
+            <p style="margin:0.3rem 0;">C++: vcpkg / Conan</p>
+            <p style="margin:0.3rem 0;">Python: pip</p>
+            <p style="margin:0.3rem 0;">Go: go get</p>
+            <p style="margin:0.3rem 0;">Node.js: npm / pnpm / yarn</p>
+        </div>
+        <div style="flex:1 1 260px; padding:1rem 1.25rem; border:1px solid rgba(255,184,108,0.35); border-radius:14px; background:rgba(41,24,15,0.55);">
+            <h3 style="color:#ffb86c; margin-top:0;">Universal Connector (SRL)</h3>
+            <p style="margin:0.3rem 0;">Secure Resource Locator with encrypted credentials</p>
+            <p style="margin:0.3rem 0;">Connection table: name, status, read/write flags</p>
+            <p style="margin:0.3rem 0;">Math-first, deterministic, open-source core</p>
+        </div>
+        <div style="flex:1 1 260px; padding:1rem 1.25rem; border:1px solid rgba(120,200,255,0.4); border-radius:14px; background:rgba(10,20,35,0.65);">
+            <h3 style="color:#9be8ff; margin-top:0;">Server & Runtime</h3>
+            <p style="margin:0.3rem 0;">ButterflyFX server bundle (HTML, game, LAN, DB, serverless socket)</p>
+            <p style="margin:0.3rem 0;">One API key unlocks the marketplace and addons</p>
+            <p style="margin:0.3rem 0;">Login + Terms of Service required to generate keys</p>
+        </div>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-top:1.2rem;">
+        <a href="#" style="padding:0.8rem 1.2rem; border-radius:12px; background:#9be8ff15; border:1px solid #9be8ff55; color:#9be8ff; text-decoration:none;">Get API Key</a>
+        <a href="#" style="padding:0.8rem 1.2rem; border-radius:12px; background:#ffb86c15; border:1px solid #ffb86c55; color:#ffb86c; text-decoration:none;">Download Core Artifact</a>
+        <a href="#" style="padding:0.8rem 1.2rem; border-radius:12px; background:#8fd3ff15; border:1px solid #8fd3ff55; color:#8fd3ff; text-decoration:none;">Marketplace (Addons)</a>
+        <a href="#" style="padding:0.8rem 1.2rem; border-radius:12px; background:#c2ff8f15; border:1px solid #c2ff8f55; color:#c2ff8f; text-decoration:none;">Docs: Integrate SRL</a>
+    </div>
+
+    <p style="margin-top:1rem; color:#c8d6e8;">
+        Tooling targets: Maven/Gradle, NuGet, vcpkg/Conan, pip, go modules, npm/pnpm/yarn, plus IDE extensions (VS Code, Eclipse).
+        The core stays open-source and free; only API keys gate marketplace access and telemetry.
+    </p>
+</section>
+
+    <!-- STORAGE COMPARISON PANEL -->
+    <section id="storage">
+        <div class="glyph">◔</div>
+        <h2>Storage vs. Substrait</h2>
+        <p>
+            Sampling every point on the grid as raw data costs bits and bytes. Expressing the same pattern as a
+            substrait plus a lens costs far less. Below is a live estimate based on the current grid resolution.
+        </p>
+        <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; align-items:flex-start; margin-top:1rem;">
+            <div style="flex:1 1 260px; padding:1rem 1.25rem; border:1px solid rgba(143,211,255,0.35); border-radius:14px; background:rgba(15,20,41,0.65);">
+                <h3 style="color:#8fd3ff; margin-top:0;">Raw Sampled Data</h3>
+                <p style="margin:0.25rem 0;">Bytes: <span id="rawBytes" class="highlight">—</span></p>
+                <p style="margin:0.25rem 0;">Bits: <span id="rawBits" class="highlight">—</span></p>
+                <p style="margin:0.25rem 0; font-size:0.95rem; color:#b9c4d6;">Assumes ~3 floats (12 bytes) per sampled point.</p>
+            </div>
+            <div style="flex:1 1 260px; padding:1rem 1.25rem; border:1px solid rgba(255,184,108,0.35); border-radius:14px; background:rgba(41,24,15,0.55);">
+                <h3 style="color:#ffb86c; margin-top:0;">Substrait + Lens</h3>
+                <p style="margin:0.25rem 0;">Bytes: <span id="subBytes" class="highlight">—</span></p>
+                <p style="margin:0.25rem 0; font-size:0.95rem; color:#e7c9a3;">Approx. expression & lens parameters.</p>
+            </div>
+            <div style="flex:1 1 220px; padding:1rem 1.25rem; border:1px solid rgba(120,200,255,0.4); border-radius:14px; background:rgba(10,20,35,0.65);">
+                <h3 style="color:#9be8ff; margin-top:0;">Savings</h3>
+                <p style="margin:0.25rem 0;">Data reduced: <span id="savedPct" class="highlight">—</span>%</p>
+                <p style="margin:0.25rem 0; font-size:0.95rem; color:#c8d6e8;">1 − (substrait bytes / raw bytes).</p>
+            </div>
+        </div>
+    </section>
+
+<!-- HOW WE GLEAN INFORMATION -->
+<section id="glean">
+    <div class="glyph">◐</div>
+    <h2>How We Glean Information</h2>
+    <p>
+        Information is revealed by observing a substrait through a <span class="highlight">lens</span>.
+        A lens is simply a way of looking:
+    </p>
+    <p>
+        • A color lens shows height as color<br>
+        • A sound lens turns position into pitch<br>
+        • A motion lens turns curves into animation<br>
+        • A vector lens shows direction and flow
+    </p>
+    <p>
+        The shape never changes — only how you view it.
+    </p>
+</section>
+
+<!-- EXAMPLES -->
+<section id="examples">
+    <div class="glyph">✹</div>
+    <h2>What We Can Extract</h2>
+    <p>
+        From a single substrait, we can extract:
+    </p>
+    <p>
+        • <strong class="highlight">Color</strong> — height becomes brightness or hue<br>
+        • <strong class="highlight">Sound</strong> — position becomes pitch<br>
+        • <strong class="highlight">Motion</strong> — slope becomes speed<br>
+        • <strong class="highlight">Events</strong> — inflection points become triggers<br>
+        • <strong class="highlight">Geometry</strong> — curvature becomes structure
+    </p>
+    <p>
+        All of this comes from <em>one</em> shape.
+        No files. No stored data. Just a substrait and a way of looking at it.
+    </p>
+</section>
+
+<!-- WHY IT MATTERS -->
+<section id="why">
+    <div class="glyph">🜁</div>
+    <h2>Why This Matters</h2>
+    <p>
+        • No stored data means nothing to corrupt.<br>
+        • Expressions are tiny and portable.<br>
+        • Any app can read the same substrait.<br>
+        • Identity stays in control of everything.<br>
+        • Everything is reversible and future‑proof.<br>
+    </p>
+    <p>
+        ButterflyFX gives creators, developers, and communities a new foundation for building
+        tools, worlds, and experiences.
+    </p>
+</section>
+
+<!-- NAVIGATION -->
+<nav>
+    <a href="#">Developers</a>
+    <a href="#">Applications</a>
+    <a href="#">The Kernel</a>
+</nav>
+
+<script>
+/* Simple starfield animation */
+const canvas = document.getElementById("stars");
+const ctx = canvas.getContext("2d");
+let w, h;
+let stars = [];
+
+function init() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    stars = Array.from({length: 200}, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        z: Math.random() * 2 + 0.5
+    }));
+}
+
+function animate() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "white";
+
+    stars.forEach(s => {
+        ctx.globalAlpha = s.z * 0.6;
+        ctx.fillRect(s.x, s.y, s.z, s.z);
+        s.y += s.z * 0.4;
+        if (s.y > h) s.y = 0;
+    });
+
+    requestAnimationFrame(animate);
+}
+
+init();
+animate();
+window.onresize = init;
+
+/* Interactive substrait + lens panel with audio beeps */
+const sub = document.getElementById("substrateCanvas");
+const subctx = sub.getContext("2d");
+const subSelect = document.getElementById("substraitSelect");
+const lensSelect = document.getElementById("lensSelect");
+const readout = document.getElementById("hoverReadout");
+const rawBytesEl = document.getElementById("rawBytes");
+const rawBitsEl = document.getElementById("rawBits");
+const subBytesEl = document.getElementById("subBytes");
+const savedPctEl = document.getElementById("savedPct");
+const navDrawer = document.getElementById("navDrawer");
+const menuToggle = document.getElementById("menuToggle");
+const appsDropdown = document.getElementById("appsDropdown");
+const appsToggle = document.getElementById("appsToggle");
+let t = 0;
+let substraitType = subSelect ? subSelect.value : "sine";
+let lensType = lensSelect ? lensSelect.value : "color";
+let rainbowTrail = [];
+let vectorArrow = null;
+let soundRipples = [];
+const gridSpacing = 25;
+let gridPoints = [];
+let hoverPoint = null;
+let scanActive = false;
+let scanIndex = 0;
+
+function updateStoragePanel() {
+    if (!rawBytesEl || !rawBitsEl || !subBytesEl || !savedPctEl) return;
+    const gridX = Math.floor(sub.width / gridSpacing) + 1;
+    const gridY = Math.floor(sub.height / gridSpacing) + 1;
+    const sampleCount = gridX * gridY;
+    const bytesPerSample = 12; // e.g., 3 floats (position/value)
+    const rawBytes = sampleCount * bytesPerSample;
+    const rawBits = rawBytes * 8;
+    const exprBytes = 128; // approximate substrait expression size
+    const lensBytes = 32;  // approximate lens parameters
+    const subBytes = exprBytes + lensBytes;
+    const savedPct = rawBytes > 0 ? Math.max(0, (1 - subBytes / rawBytes) * 100) : 0;
+
+    rawBytesEl.textContent = rawBytes.toLocaleString();
+    rawBitsEl.textContent = rawBits.toLocaleString();
+    subBytesEl.textContent = subBytes.toLocaleString();
+    savedPctEl.textContent = savedPct.toFixed(1);
+}
+
+// Utility: quantize raw frequency to nearest semitone (whole/half steps) and return note info
+// Center octave anchored at C4; canvas split into sections, each adds/subtracts an octave so pitch rises left-to-right.
+function quantizeToNote(rawFreq, xPos, canvasWidth) {
+    const names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const midiRaw = Math.round(69 + 12 * Math.log2(rawFreq / 440)); // nearest semitone from substrait
+    const noteIndex = ((midiRaw % 12) + 12) % 12;
+    const sections = 7; // center + 3 octaves down/up
+    const sectionW = canvasWidth / sections;
+    const midSection = Math.floor(sections / 2);
+    const octaveOffset = Math.floor(xPos / sectionW) - midSection; // progresses upward left->right
+    const baseOctave = 4; // center is C4
+    const octave = baseOctave + octaveOffset;
+    const midi = noteIndex + octave * 12;
+    const freq = 440 * Math.pow(2, (midi - 69) / 12);
+    const label = `${names[noteIndex]}${octave}`;
+    return { freq, label };
+}
+
+function curvatureSign(x, t, type) {
+    const y0 = curveY(Math.max(0, x - 1), t, type);
+    const y1 = curveY(x, t, type);
+    const y2 = curveY(Math.min(sub.width, x + 1), t, type);
+    const second = y2 - 2 * y1 + y0;
+    if (second > 0.5) return "concave up";
+    if (second < -0.5) return "concave down";
+    return "near inflection";
+}
+
+function quadrantFromAngle(angle) {
+    const a = (angle + 360) % 360;
+    if (a >= 45 && a < 135) return "Q1";
+    if (a >= 135 && a < 225) return "Q2";
+    if (a >= 225 && a < 315) return "Q3";
+    return "Q4";
+}
+
+// Audio setup
+let audioCtx;
+let lastBeep = 0;
+function getCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+}
+function playBeep(freq) {
+    const now = performance.now();
+    if (now - lastBeep < 80) return; // throttle rapid moves
+    lastBeep = now;
+    const ctxA = getCtx();
+    const o = ctxA.createOscillator();
+    const g = ctxA.createGain();
+    o.type = "sine";
+    o.frequency.value = freq;
+    g.gain.value = 0.08;
+    o.connect(g).connect(ctxA.destination);
+    o.start();
+    o.stop(ctxA.currentTime + 0.12);
+}
+
+function curveY(x, t, type) {
+    if (type === "sine") {
+        return 120 + Math.sin((x + t) * 0.02) * 60;
+    } else if (type === "spiral") {
+        return 120 + Math.sin((x * 0.04 + t * 0.01)) * (x * 0.07 + 20);
+    } else if (type === "logistic") {
+        const L = 1, k = 0.045, x0 = sub.width / 2;
+        return 220 - (L / (1 + Math.exp(-k * (x - x0)))) * 200;
+    } else if (type === "zxy") {
+        // True saddle from product of two axes: x and a time/phase-driven y component
+        const xN = (x / sub.width) * 2 - 1; // -1..1 across grid
+        const yPhase = t * 0.04 + (x / gridSpacing) * 0.35;
+        const yN = Math.sin(yPhase); // -1..1
+        const z = xN * yN; // xy saddle
+        return sub.height / 2 - z * (sub.height * 0.3);
+    } else if (type === "zxy2") {
+        // Quadratic table: x times y^2 (parabolic in y, sign from x)
+        const xN = (x / sub.width) * 2 - 1; // -1..1
+        const yPhase = t * 0.04 + (x / gridSpacing) * 0.35;
+        const yN = Math.sin(yPhase); // -1..1
+        const z = xN * (yN * yN); // y^2 >=0, so parabola scaled by x sign
+        return sub.height / 2 - z * (sub.height * 0.35);
+    } else if (type === "musicscale") {
+        const steps = [0, 2, 4, 5, 7, 9, 11, 12]; // major scale semitones
+        const seg = sub.width / steps.length;
+        const idx = Math.min(steps.length - 1, Math.max(0, Math.floor(x / seg)));
+        const base = steps[idx];
+        return 150 - base * 6 + Math.sin(t * 0.04 + idx) * 8;
+    }
+    return 120;
+}
+
+function slopeAngleDeg(x, t, type) {
+    const y1 = curveY(Math.max(0, x - 1), t, type);
+    const y2 = curveY(Math.min(sub.width, x + 1), t, type);
+    const angle = Math.atan2(y2 - y1, 2); // delta x ~2 px
+    return (angle * 180 / Math.PI + 360) % 360;
+}
+
+function lensValue(x, y, type) {
+    const normY = 1 - (y / sub.height);
+    const normX = x / sub.width;
+    const slopeDeg = slopeAngleDeg(x, t, substraitType) / 360; // normalized slope contribution
+    if (type === "color") {
+        // full spectrum 0-360 with unweighted X/Y plus gentle time jitter so every substrait spans all hues
+        const jitter = 0.15 * ((Math.sin(t * 0.01 + x * 0.02) + 1) / 2);
+        const blended = (normX + normY + slopeDeg + jitter) % 1;
+        const hue = Math.floor(360 * blended);
+        return { text: `Color hue: ${hue}°`, color: `hsl(${hue},80%,60%)` };
+    }
+    if (type === "sound" || type === "note") {
+        const angle = slopeAngleDeg(x, t, substraitType);
+        const dist = Math.abs(y - sub.height / 2) / (sub.height / 2);
+        // derive raw freq directly from substrait-driven features
+        const rawFreq = 110 + 1650 * (0.35 * dist + 0.65 * (angle / 360));
+        if (type === "note") {
+            const note = quantizeToNote(rawFreq, x, sub.width);
+            const text = `Note: ${note.label} (${note.freq.toFixed(1)} Hz) | from slope ${angle.toFixed(0)}° & height`;
+            return { text, color: "#ffb86c", freq: note.freq };
+        }
+        const label = `Sound freq: ${rawFreq.toFixed(0)} Hz`;
+        return { text: label, color: "#ffb86c", freq: rawFreq };
+    }
+    if (type === "vector") {
+        const angle = Math.floor(slopeAngleDeg(x, t, substraitType));
+        const quad = quadrantFromAngle(angle);
+        const curve = curvatureSign(x, t, substraitType);
+        return { text: `Vector angle: ${angle}° | quadrant: ${quad} | ${curve}`, color: "#9be8ff", angle };
+    }
+    if (type === "ascii") {
+        const code = 33 + Math.floor(normY * 60);
+        const ch = String.fromCharCode(code);
+        const dist0 = Math.abs(y - sub.height / 2).toFixed(1);
+        const xPos = Math.round(x);
+        const yPos = Math.round(y);
+        return { text: `ASCII: ${ch} (code ${code}) | x=${xPos}, y=${yPos}, |y-mid|=${dist0}`, color: "#8fd3ff" };
+    }
+    return { text: "", color: "#e8ecf3" };
+}
+
+function lensHue(x, y, type) {
+    if (type === "color") {
+        const blended = ((x / sub.width) + (1 - y / sub.height) + slopeAngleDeg(x, t, substraitType) / 360 + 0.15 * ((Math.sin(t * 0.01 + x * 0.02) + 1) / 2)) % 1;
+        return Math.floor(blended * 360);
+    }
+    if (type === "sound" || type === "note") {
+        const angle = slopeAngleDeg(x, t, substraitType);
+        const dist = Math.abs(y - sub.height / 2) / (sub.height / 2);
+        const rawFreq = 110 + 1650 * (0.35 * dist + 0.65 * (angle / 360));
+        return ((rawFreq - 110) / 1760) * 360; // map freq range to hue
+    }
+    if (type === "vector") {
+        return slopeAngleDeg(x, t, substraitType); // angle already 0-360
+    }
+    if (type === "ascii") {
+        const code = 33 + Math.floor((1 - y / sub.height) * 60);
+        return (code % 90) / 90 * 360;
+    }
+    return 200;
+}
+
+function drawInteractive() {
+    subctx.clearRect(0, 0, sub.width, sub.height);
+
+    // grid background
+    subctx.strokeStyle = "rgba(255,255,255,0.07)";
+    subctx.lineWidth = 1;
+    for (let gx = 0; gx <= sub.width; gx += gridSpacing) {
+        subctx.beginPath();
+        subctx.moveTo(gx, 0);
+        subctx.lineTo(gx, sub.height);
+        subctx.stroke();
+    }
+    for (let gy = 0; gy <= sub.height; gy += gridSpacing) {
+        subctx.beginPath();
+        subctx.moveTo(0, gy);
+        subctx.lineTo(sub.width, gy);
+        subctx.stroke();
+    }
+
+    // sample substrait on grid columns as points
+    gridPoints = [];
+    for (let gx = 0; gx <= sub.width; gx += gridSpacing) {
+        const y = curveY(gx, t, substraitType);
+        gridPoints.push({ x: gx, y });
+    }
+
+    gridPoints.forEach(p => {
+        subctx.beginPath();
+        const hue = lensHue(p.x, p.y, lensType);
+        subctx.fillStyle = `hsl(${hue},80%,60%)`;
+        subctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        subctx.fill();
+    });
+
+    // scanning activation left-to-right when cursor is inside panel
+    if (scanActive && gridPoints.length) {
+        scanIndex = (scanIndex + 1) % gridPoints.length;
+        const p = gridPoints[scanIndex];
+        subctx.beginPath();
+        subctx.strokeStyle = "#ffffff";
+        subctx.lineWidth = 2;
+        subctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+        subctx.stroke();
+
+        const lens = lensValue(p.x, p.y, lensType);
+        if ((lensType === "sound" || lensType === "note") && lens.freq) {
+            playBeep(lens.freq);
+            const wavelength = 200 + (1800 - lens.freq);
+            soundRipples.push({ x: p.x, y: p.y, baseRadius: 4, expand: Math.max(30, wavelength * 0.05), life: 1 });
+            if (soundRipples.length > 40) soundRipples.shift();
+        }
+        if (lensType === "color") {
+            const hue = lensHue(p.x, p.y, lensType);
+            rainbowTrail.push({ x: p.x, y: p.y, hue, life: 1 });
+            if (rainbowTrail.length > 120) rainbowTrail.shift();
+        }
+        if (lensType === "vector" && lens.angle !== undefined) {
+            vectorArrow = { x: p.x, y: p.y, angle: lens.angle, life: 1 };
+        }
+    }
+
+    updateStoragePanel();
+
+    // highlight current hover point
+    if (hoverPoint) {
+        subctx.beginPath();
+        subctx.strokeStyle = "#ffffff";
+        subctx.lineWidth = 2;
+        subctx.arc(hoverPoint.x, hoverPoint.y, 7, 0, Math.PI * 2);
+        subctx.stroke();
+    }
+
+    // draw rainbow trail for color lens
+    if (rainbowTrail.length) {
+        rainbowTrail = rainbowTrail.filter(p => p.life > 0);
+        rainbowTrail.forEach(p => {
+            const alpha = p.life;
+            const radius = 10 * p.life + 4;
+            subctx.beginPath();
+            subctx.fillStyle = `hsla(${p.hue},90%,60%,${alpha})`;
+            subctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            subctx.fill();
+            p.life -= 0.012;
+        });
+    }
+
+    // sound ripples
+    if (soundRipples.length) {
+        soundRipples = soundRipples.filter(r => r.life > 0);
+        soundRipples.forEach(r => {
+            const alpha = r.life * 0.5;
+            const radius = r.baseRadius + r.expand * (1 - r.life);
+            subctx.beginPath();
+            subctx.strokeStyle = `rgba(255, 184, 108, ${alpha})`;
+            subctx.lineWidth = 2;
+            subctx.arc(r.x, r.y, radius, 0, Math.PI * 2);
+            subctx.stroke();
+            r.life -= 0.02;
+        });
+    }
+
+    // draw vector arrow if active
+    if (vectorArrow && vectorArrow.life > 0) {
+        const a = vectorArrow.angle * Math.PI / 180;
+        const len = 36;
+        const x1 = vectorArrow.x;
+        const y1 = vectorArrow.y;
+        const x2 = x1 + Math.cos(a) * len;
+        const y2 = y1 + Math.sin(a) * len;
+        subctx.strokeStyle = '#9be8ff';
+        subctx.lineWidth = 3;
+        subctx.beginPath();
+        subctx.moveTo(x1, y1);
+        subctx.lineTo(x2, y2);
+        subctx.stroke();
+        // arrow head
+        const headLen = 10;
+        const leftA = a + Math.PI * 0.8;
+        const rightA = a - Math.PI * 0.8;
+        subctx.beginPath();
+        subctx.moveTo(x2, y2);
+        subctx.lineTo(x2 + Math.cos(leftA) * headLen, y2 + Math.sin(leftA) * headLen);
+        subctx.lineTo(x2 + Math.cos(rightA) * headLen, y2 + Math.sin(rightA) * headLen);
+        subctx.closePath();
+        subctx.fillStyle = '#9be8ff';
+        subctx.fill();
+        vectorArrow.life -= 0.03;
+    }
+
+    t += 1.4;
+    requestAnimationFrame(drawInteractive);
+}
+
+if (subSelect) subSelect.onchange = () => { substraitType = subSelect.value; };
+if (lensSelect) lensSelect.onchange = () => { lensType = lensSelect.value; };
+
+sub.addEventListener('mousemove', (e) => {
+    const rect = sub.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (sub.width / rect.width);
+    const my = (e.clientY - rect.top) * (sub.height / rect.height);
+
+    scanActive = true;
+
+    // snap hover to nearest grid point so interaction reflects grid sampling
+    let x = mx, y = my;
+    if (gridPoints.length) {
+        let best = Infinity;
+        gridPoints.forEach(p => {
+            const d2 = (p.x - mx) ** 2 + (p.y - my) ** 2;
+            if (d2 < best) { best = d2; x = p.x; y = p.y; }
+        });
+    } else {
+        y = curveY(x, t, substraitType);
+    }
+
+    hoverPoint = { x, y };
+
+    const lens = lensValue(x, y, lensType);
+    readout.textContent = lens.text;
+    readout.style.color = lens.color;
+    if ((lensType === "sound" || lensType === "note") && lens.freq) {
+        playBeep(lens.freq);
+    }
+    if (lensType === "color" && lens.text.includes("Color hue")) {
+        const hueMatch = lens.text.match(/([0-9]+)°/);
+        const hue = hueMatch ? parseInt(hueMatch[1], 10) : 200;
+        rainbowTrail.push({ x, y, hue, life: 1 });
+        if (rainbowTrail.length > 120) rainbowTrail.shift();
+    }
+    if (lensType === "vector") {
+        const angle = slopeAngleDeg(x, t, substraitType);
+        vectorArrow = { x, y, angle, life: 1 };
+    }
+    if ((lensType === "sound" || lensType === "note") && lens.freq) {
+        // wavelength proxy: lower freq -> larger ripple
+        const wavelength = 200 + (1800 - lens.freq);
+        soundRipples.push({ x, y, baseRadius: 4, expand: Math.max(30, wavelength * 0.05), life: 1 });
+        if (soundRipples.length > 40) soundRipples.shift();
+    }
+});
+
+sub.addEventListener('mouseleave', () => { hoverPoint = null; scanActive = false; scanIndex = 0; });
+
+drawInteractive();
+
+// mobile nav toggle
+if (menuToggle && navDrawer) {
+    menuToggle.addEventListener('click', () => {
+        navDrawer.classList.toggle('open');
+    });
+    navDrawer.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => navDrawer.classList.remove('open'));
+    });
+}
+
+if (appsDropdown && appsToggle) {
+    const toggleOpen = () => appsDropdown.classList.toggle('open');
+    appsToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleOpen();
+    });
+    appsDropdown.addEventListener('mouseleave', () => appsDropdown.classList.remove('open'));
+}
+</script>
+
+</body>
 </html>

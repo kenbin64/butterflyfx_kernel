@@ -1,0 +1,800 @@
+{% extends 'base.html' %}
+{% block title %}ButterflyFX{% endblock %}
+{% block content %}
+  <!-- Hero Section -->
+  <section id="hero" class="card" style="margin-top:1rem">
+    <div class="glyph">✦ ◈ ⟡ ◇ ✧</div>
+    <h1>ButterflyFX</h1>
+    <h2>ButterflyFx a small flutter brings out the world.</h2>
+    <p>
+      Data need not be stored; it can be taken from the living rock of geometry—extracted like color from stone, or wavelength from sound, or light from photons. We do not store data; we take it from geometry where it has always existed, merely extracted through any lens of our choosing.
+    </p>
+    <p class="muted">ButterflyFx a small flutter brings out the world.</p>
+  </section>
+
+  <!-- Substrait Section with Demo -->
+  <section id="substrait" class="card" style="margin-top:1rem">
+    <div style="text-align:center">
+      <div class="glyph">◈ ▢ ◈</div>
+      <h2>✧ What Is a Substrait? ✧</h2>
+    </div>
+    <p>
+      A substrait is a geometric shape whose contours, angles, and density already carry the data. It isn’t a file; it’s a dimensional map you can sample. Change the lens and you read the same shape in color, tone, motion, or numbers.
+    </p>
+    <div class="card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);padding:1rem;margin-top:0.75rem;">
+      <div style="display:flex;flex-wrap:wrap;gap:0.6rem;align-items:center;justify-content:space-between;">
+        <div>
+          <h3 style="margin:0;">Live 3D substrait</h3>
+          <p class="muted" style="margin:0.25rem 0 0;">Drag to rotate. Hover for coordinates, slope, and vector. Generated on the fly; no hardcoded mesh.</p>
+          <p class="muted" style="margin:0.35rem 0 0;">
+            Every point in the substrait already carries values: position, slope, angle, pitch, distance from zero, distance from its neighbors. A lens simply remaps that inherent structure into a form we care about, including color, tone, motion, and vectors, so a tiny expression can stand in for a massive dataset (like how <em>e = mc<sup>2</sup></em> encodes tremendous structure without enumerating the universe).
+          </p>
+        </div>
+        <div style="display:flex;gap:0.35rem;">
+          <button id="substrait-xy" class="btn btn-sm btn-outline-info" aria-pressed="true">z = x·y</button>
+          <button id="substrait-xy2" class="btn btn-sm btn-outline-info" aria-pressed="false">z = x·y²</button>
+        </div>
+      </div>
+      <div id="substrait-3d" style="width:100%;height:320px;position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:rgba(0,0,0,0.18);margin-top:0.65rem;"></div>
+      <div id="substrait-3d-fallback" class="muted" style="display:none;margin-top:0.5rem;font-size:0.95rem;">If your browser blocks WebGL, imagine the saddle (z = x·y) and bowl-saddle hybrid (z = x·y²) as layered contours; the data stays in the shape.</div>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);padding:1rem;margin-top:0.9rem;">
+      <h3 style="margin:0 0 0.35rem;">What is a lens?</h3>
+      <p class="muted" style="margin:0 0 0.35rem;">A lens is a deterministic transform from the same underlying shape into a specific signal or view. Swap the lens, keep the shape.</p>
+      <p style="margin:0;">
+        • <strong>Inputs</strong>: position (x,y,z,m), slope, curvature, density, entropy<br>
+        • <strong>Outputs</strong>: color, sound, vector fields, text labels, mesh geometry, events, envelopes
+      </p>
+      <p style="margin:0.4rem 0 0;">
+        Examples: color lens (height → hue), sound lens (position → pitch), vector lens (gradient → arrows), event lens (inflection → triggers), mesh lens (heightfield → normals/depth).
+      </p>
+      <p class="muted" style="margin:0.35rem 0 0;">Lens definitions live right here—before you try the demo—so every reading you see is computed, not staged.</p>
+    </div>
+
+    <!-- Interactive Demo -->
+    <div id="interactive" class="card" style="margin-top:1.25rem; padding:1rem;">
+      <h3>Substrait &amp; Lens Demo</h3>
+      <p class="muted">Pick a substrait and lens; hover to see (and hear) the derived value.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:flex-start; align-items:center; margin:0.75rem 0 1rem;">
+        <label class="muted">Substrait
+          <select id="substraitSelect" class="substrate-selector" style="margin-left:0.5rem;">
+            <option value="sine">Sine Wave</option>
+            <option value="spiral">Spiral Wave</option>
+            <option value="logistic">Logistic Curve</option>
+            <option value="zxy">z = x·y</option>
+            <option value="zxy2">z = x·y²</option>
+            <option value="musicscale">Musical Scale</option>
+            <option value="snail">Snail Shell</option>
+            <option value="goldenratio">Golden Ratio Spiral</option>
+            <option value="momentum">Momentum</option>
+            <option value="logic">Logic Gate</option>
+            <option value="image">Image Substrait</option>
+          </select>
+        </label>
+
+        <label class="muted">Lens
+          <select id="lensSelect" class="lens-selector" style="margin-left:0.5rem;">
+            <option value="" disabled selected>Loading lenses…</option>
+          </select>
+        </label>
+
+        <label class="muted" style="display:flex; align-items:center; gap:0.5rem;">
+          Upload image
+          <input id="imageUpload" type="file" accept="image/*" style="color:#fff; max-width:220px;" />
+        </label>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-start; margin-bottom:1rem;">
+        <div class="card" style="flex:1 1 240px; padding:0.65rem 0.8rem; background:rgba(0,0,0,0.35); border:1px solid rgba(143,211,255,0.18);">
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <canvas id="lensBadge" width="220" height="90" style="width:220px; height:90px; border-radius:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08);"></canvas>
+            <div style="flex:1; min-width:180px;">
+              <div class="muted" style="margin:0 0 0.25rem;">Lens schema</div>
+              <div id="lensSchema" style="font-size:0.92rem; line-height:1.25; color:#eaf3ff;">Pick a substrait and lens to see its dimensions, modes, and parameters.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:relative;">
+        <canvas id="substrateCanvas" width="700" height="250" style="width:100%; border-radius:16px; background:rgba(255,255,255,0.05);"></canvas>
+        <div id="hoverReadout" style="position:absolute; top:10px; left:10px; padding:0.55rem 0.8rem; border-radius:10px; background:rgba(0,0,0,0.55); color:#e8ecf3; font-size:0.95rem; border:1px solid #8fd3ff55; pointer-events:none;">Hover to sample the substrait through a lens</div>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:flex-start; margin-top:1rem;">
+        <div class="card stat-card" style="padding:0.75rem 1rem;">
+          <div class="muted">Raw bytes</div>
+          <div><span id="rawBytes">—</span> bytes</div>
+          <div><span id="rawBits">—</span> bits</div>
+        </div>
+        <div class="card stat-card" style="padding:0.75rem 1rem;">
+          <div class="muted">Substrait + Lens</div>
+          <div><span id="subBytes">—</span> bytes</div>
+        </div>
+        <div class="card stat-card" style="padding:0.75rem 1rem;">
+          <div class="muted">Savings</div>
+          <div><span id="savedPct">—</span>%</div>
+        </div>
+        <div class="card stat-card" style="padding:0.75rem 1rem;">
+          <div class="muted">Footprint</div>
+          <div>RAM: <span id="ramUsage">—</span></div>
+          <div>HDD: <span id="hddUsage">—</span></div>
+        </div>
+      </div>
+      <div id="substrate-source-note" class="muted" style="margin-top:0.35rem; color:#cfe9ff; font-size:0.9rem;">Data source: requesting core backend…</div>
+    </div>
+  </section>
+
+  <!-- Core Section -->
+  <section id="core" class="card" style="margin-top:1rem">
+    <div style="text-align:center">
+      <div class="glyph">⟡ ◉ ⟡</div>
+      <h2>⚙ ButterflyFX Core, SRL &amp; Universal Connector ⚙</h2>
+    </div>
+    <p>
+      Everything you see here is served by the ButterflyFX Python core running in this container. The stats, samples, and calculator call the live backend. No placeholder numbers.
+    </p>
+    <p class="muted">
+      What’s not here yet: remote connectors, keys, and a marketplace. Those stay off until they’re ready and tested.
+    </p>
+
+    <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; align-items:flex-start; margin-top:1rem;">
+      <div class="card" style="flex:1 1 260px; padding:1rem 1.25rem;">
+        <h3>What’s running now</h3>
+        <p style="margin:0.3rem 0;">Python core (this server)</p>
+        <p style="margin:0.3rem 0;">FastAPI demo endpoints under <code>/api/demo</code></p>
+        <p style="margin:0.3rem 0;">JS front-end calling the live core</p>
+      </div>
+      <div class="card" style="flex:1 1 260px; padding:1rem 1.25rem;">
+        <h3>Connector status</h3>
+        <p style="margin:0.3rem 0;">SRL ideas documented; remote connectors not shipped here.</p>
+        <p style="margin:0.3rem 0;">No credentials exchanged; only local calls.</p>
+        <p style="margin:0.3rem 0;">Planned: SRL-backed resource table and auth.</p>
+      </div>
+      <div class="card" style="flex:1 1 260px; padding:1rem 1.25rem;">
+        <h3>Server &amp; runtime</h3>
+        <p style="margin:0.3rem 0;">Runs via Docker (python:3.12-slim) in this repo.</p>
+        <p style="margin:0.3rem 0;">Everything on this page reads from that local core.</p>
+        <p style="margin:0.3rem 0;">No marketplace or key issuance in this build.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Examples Section -->
+  <section id="examples" class="card" style="margin-top:1rem">
+    <div style="text-align:center">
+      <div class="glyph">✹ ◇ ✹</div>
+      <h2>✦ What We Can Extract ✦</h2>
+    </div>
+    <p>From a single substrait, we can extract:</p>
+    <p>
+      • <strong>Color</strong> — height becomes brightness or hue<br>
+      • <strong>Sound</strong> — position becomes pitch<br>
+      • <strong>Motion</strong> — slope becomes speed<br>
+      • <strong>Events</strong> — inflection points become triggers<br>
+      • <strong>Geometry</strong> — curvature becomes structure
+    </p>
+    <div class="card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);padding:0.75rem 1rem;">
+      <h3 style="margin-top:0;margin-bottom:0.4rem;">More examples & data types</h3>
+      <p class="muted" style="margin-bottom:0.5rem;">Same shape, more looks:</p>
+      <p style="margin-bottom:0.35rem;">
+        • <strong>Heatmaps</strong> — density → temperature gradients<br>
+        • <strong>Vectors/flow</strong> — direction → arrows/streamlines<br>
+        • <strong>Contours</strong> — level sets → isolines/threshold masks<br>
+        • <strong>Time-series</strong> — slope/curvature → anomaly pings<br>
+        • <strong>Text cues</strong> — curvature → sentiment/tonal labels<br>
+        • <strong>Graph edges</strong> — proximity → relationship strength<br>
+        • <strong>3D meshes</strong> — heightfield → mesh, normals, depth<br>
+        • <strong>Audio envelopes</strong> — arc length → ADSR-style profiles
+      </p>
+    </div>
+    <p style="margin-top:0.75rem;">
+      All of this comes from <em>one</em> shape. No files. No stored data. Just a substrait and a way of looking at it.
+    </p>
+  </section>
+
+  <!-- Why Section -->
+  <section id="why" class="card" style="margin-top:1rem">
+    <div style="text-align:center">
+      <div class="glyph">⬡ 🜁 ⬡</div>
+      <h2>◈ Why This Matters ◈</h2>
+    </div>
+    <p>
+      • No stored data means nothing to corrupt.<br>
+      • Expressions are tiny and portable.<br>
+      • Any app can read the same substrait.<br>
+      • Identity stays in control of everything.<br>
+      • Everything is reversible and future‑proof.
+    </p>
+    <p>
+      ButterflyFX gives creators, developers, and communities a new foundation for building tools, worlds, and experiences.
+    </p>
+  </section>
+
+
+  <!-- One Law of Dimensions -->
+  <section id="dimensional-law" class="card" style="margin-top:1rem;color:#e8f6ff;">
+    <div style="text-align:center">
+      <div class="glyph">🧭</div>
+      <h2>One Law of Dimensions</h2>
+    </div>
+    <p><strong>The rule:</strong> Point in higher dim = spans the whole lower dim. Simple addressing, no deep tree to walk.</p>
+    <p style="color:#cfe9ff;">The creative spiral mirrors this: many steps, one simple address up top.</p>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">
+        <h3>Why it matters for storage</h3>
+        <p>Addressing is one stride: <code>idx = x + X·(y + Y·(z + Z·m))</code>. A higher-dimensional point can represent an entire lower-dimensional span, so you avoid nested traversal and only materialize data when needed.</p>
+        <p><strong>Demo tie-in:</strong> In the calculator above, increasing M grows capacity without adding lookup depth—access stays O(1); packing is only kept when it beats raw (margin-aware).</p>
+      </div>
+
+      <div class="card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
+        <h3 style="margin-top:0;">Fibonacci spiral layers of creation & dimensional model</h3>
+        <p class="muted" style="color:#cfe9ff;">Eight beats: void → point → line → width → plane → cube → interlaced cubes → single 4D address. The Fibonacci squares and dimension model evolve together.</p>
+        <div style="display:grid;grid-template-columns:minmax(260px,0.9fr) minmax(420px,1.1fr);gap:14px;align-items:start;">
+          <div class="card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);padding:12px;">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+              <button class="btn dim-step" data-step="0">1</button>
+              <button class="btn dim-step" data-step="1">2</button>
+              <button class="btn dim-step" data-step="2">3</button>
+              <button class="btn dim-step" data-step="3">4</button>
+              <button class="btn dim-step" data-step="4">5</button>
+              <button class="btn dim-step" data-step="5">6</button>
+              <button class="btn dim-step" data-step="6">7</button>
+              <button class="btn dim-step" data-step="7" title="Complete unit: 1 point in higher dimension">8</button>
+            </div>
+            <div class="muted" style="color:#cfe9ff; font-size:0.95rem;">0D = void • 1D = x • 2D = xy • 3D = xyz • 4D = xyzm</div>
+            <div id="dim-law-stage" style="color:#cfe9ff;font-size:0.95rem;margin:6px 0 10px;">Pick a step to place its square.</div>
+            <div class="card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);padding:10px;">
+              <h4 style="margin:0 0 6px;">Creative stack (cumulative)</h4>
+              <ul style="margin:0; padding-left:1.1rem; color:#cfe9ff; font-size:0.95rem;">
+                <li><strong>1 Spark</strong>: birth point; holds nothing yet.</li>
+                <li><strong>2 Divide</strong>: place the point on x; retains spark.</li>
+                <li><strong>3 Organize</strong>: extend to xy; holds spark + line.</li>
+                <li><strong>4 Identify</strong>: area; holds spark + line + plane.</li>
+                <li><strong>5 Assemble</strong>: layer of cube (xyz); keeps all prior.</li>
+                <li><strong>6 Human</strong>: address xyzm; references every layer beneath.</li>
+                <li><strong>7 Rest</strong>: one 4D point naming the whole cube; all info retained.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);padding:10px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px;align-items:start;">
+              <div>
+                <div class="muted" style="color:#cfe9ff;margin-bottom:4px;">Fibonacci squares (spiral)</div>
+                <canvas id="dim-law-canvas" width="720" height="480" style="width:100%;background:rgba(0,0,0,0.2);border-radius:12px;border:1px solid rgba(255,255,255,0.08);"></canvas>
+                <div class="muted" style="color:#cfe9ff;font-size:0.9rem;margin-top:4px;">Dimensions: 0D void • 1D = x • 2D = xy • 3D = xyz • 4D = xyzm</div>
+              </div>
+              <div>
+                <div class="muted" style="color:#cfe9ff;margin-bottom:4px;">Dimensional model (void → 4D point)</div>
+                <canvas id="dim-dimension-canvas" width="360" height="260" style="width:100%;background:rgba(0,0,0,0.2);border-radius:12px;border:1px solid rgba(255,255,255,0.08);"></canvas>
+                <div class="muted" style="color:#cfe9ff;font-size:0.9rem;margin-top:4px;">0D void • 1D = x • 2D = xy • 3D = xyz • 4D = xyzm</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script defer src="/static/3d_shapes.js"></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const containerId = 'substrait-3d';
+      const fallbackEl = document.getElementById('substrait-3d-fallback');
+      const btnXY = document.getElementById('substrait-xy');
+      const btnXY2 = document.getElementById('substrait-xy2');
+
+      const loadScript = (src) => new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[src="${src}"]`);
+        if (existing) {
+          const alreadyLoaded = existing.getAttribute('data-loaded') === 'true' || ['loaded', 'complete'].includes(existing.readyState);
+          if (alreadyLoaded) return resolve(true);
+          existing.addEventListener('load', () => resolve(true));
+          existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)));
+          return;
+        }
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = () => { s.setAttribute('data-loaded', 'true'); resolve(true); };
+        s.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(s);
+      });
+
+      const ensure3DStack = async () => {
+        // No external deps needed; setup3DShape is defined in /static/3d_shapes.js
+        if (typeof setup3DShape === 'function') return true;
+        try {
+          await loadScript('/static/3d_shapes.js');
+        } catch (e) {
+          console.warn('Local renderer load failed', e);
+        }
+        return (typeof setup3DShape === 'function');
+      };
+
+      const reportFailure = (why) => {
+        console.warn('3D setup failed:', why);
+        if (fallbackEl) {
+          fallbackEl.textContent = `${why} — showing contour fallback instead.`;
+          fallbackEl.style.display = 'block';
+        }
+      };
+
+      const renderFallback = () => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        container.style.position = 'relative';
+        container.style.background = 'radial-gradient(ellipse at center, rgba(0,212,255,0.25), rgba(0,0,0,0.4)), repeating-linear-gradient(45deg, rgba(255,255,255,0.08), rgba(255,255,255,0.08) 6px, rgba(0,0,0,0.08) 6px, rgba(0,0,0,0.08) 12px)';
+        const overlay = document.createElement('div');
+        overlay.style = 'position:absolute;inset:0;padding:1rem;color:#e8ecf3;font-size:0.95rem;display:flex;align-items:center;justify-content:center;text-align:center;backdrop-filter:blur(2px);';
+        overlay.textContent = '3D viewer unavailable here. Showing a CSS contour fallback — the data stays in the shape.';
+        container.appendChild(overlay);
+        if (fallbackEl) fallbackEl.style.display = 'block';
+      };
+
+      async function render(fn, label) {
+        const ready = await ensure3DStack();
+        if (!ready) {
+          renderFallback();
+          reportFailure('Renderer unavailable (could not load /static/3d_shapes.js)');
+          return;
+        }
+        try {
+          setup3DShape(containerId, fn, [-3, 3], [-3, 3], 0, label);
+          if (fallbackEl) fallbackEl.style.display = 'none';
+        } catch (err) {
+          console.warn('3D render failed, showing fallback.', err);
+          renderFallback();
+          reportFailure(err?.message || 'Render error');
+        }
+      }
+
+      if (btnXY && btnXY2) {
+        const activate = (isXY) => {
+          btnXY.classList.toggle('btn-info', isXY);
+          btnXY.classList.toggle('btn-outline-info', !isXY);
+          btnXY2.classList.toggle('btn-info', !isXY);
+          btnXY2.classList.toggle('btn-outline-info', isXY);
+          btnXY.setAttribute('aria-pressed', isXY ? 'true' : 'false');
+          btnXY2.setAttribute('aria-pressed', isXY ? 'false' : 'true');
+          if (isXY) {
+            render((x, y) => x * y, 'z = x·y');
+          } else {
+            render((x, y) => x * y * y, 'z = x·y²');
+          }
+        };
+
+        btnXY.addEventListener('click', () => activate(true));
+        btnXY2.addEventListener('click', () => activate(false));
+        activate(true);
+      } else {
+        render((x, y) => x * y, 'z = x·y');
+      }
+    });
+  </script>
+  <!-- Cache-bust to ensure latest interactive demo JS is served -->
+  <script defer src="/static/substrait_lens_demo.js?v=20260201-1"></script>
+  <script>
+    (function(){
+      const btn = document.getElementById('run-dim-demo');
+      const out = document.getElementById('dim-demo-result');
+      if(!btn || !out) return;
+
+      const fmt = (n) => Number(n).toLocaleString();
+
+      btn.addEventListener('click', async () => {
+        const xv = parseInt(document.getElementById('dim-x').value, 10) || 0;
+        const yv = parseInt(document.getElementById('dim-y').value, 10) || 0;
+        const zv = parseInt(document.getElementById('dim-z').value, 10) || 0;
+        const mv = parseInt(document.getElementById('dim-m').value, 10) || 0;
+        const tx = parseInt(document.getElementById('tile-x').value, 10) || 0;
+        const ty = parseInt(document.getElementById('tile-y').value, 10) || 0;
+        const tz = parseInt(document.getElementById('tile-z').value, 10) || 0;
+        const tm = parseInt(document.getElementById('tile-m').value, 10) || 0;
+        const entropy = parseFloat(document.getElementById('entropy-profile').value);
+        const margin = parseInt(document.getElementById('overhead-margin').value, 10) || 0;
+        if (!xv || !yv || !zv || !mv || !tx || !ty || !tz || !tm) {
+          out.innerHTML = '<strong>Please enter positive dimensions and tile sizes.</strong>';
+          return;
+        }
+
+        const params = new URLSearchParams({
+          x: xv,
+          y: yv,
+          z: zv,
+          m: mv,
+          tile_x: tx,
+          tile_y: ty,
+          tile_z: tz,
+          tile_m: tm,
+          entropy,
+          margin,
+        });
+
+        out.innerHTML = '<strong>Running core calculation…</strong>';
+        try {
+          const res = await fetch(`/api/demo/storage-decision?${params.toString()}`);
+          if (!res.ok) {
+            const msg = await res.text();
+            out.innerHTML = `<strong>Backend error:</strong> ${msg || res.status}`;
+            return;
+          }
+          const data = await res.json();
+          out.innerHTML = `
+            <div><strong>Capacity:</strong> ${fmt(data.capacity_bytes)} bytes</div>
+            <div><strong>Tile points:</strong> ${fmt(data.tile_points)} • <strong>Tiles:</strong> ${fmt(data.tile_count)}</div>
+            <div><strong>Packed bytes:</strong> ${fmt(data.packed_bytes)} • <strong>Margin:</strong> ${fmt(data.margin_bytes)}</div>
+            <div><strong>Decision:</strong> store ${data.decision}</div>
+          `;
+        } catch (err) {
+          console.error('Storage decision call failed', err);
+          out.innerHTML = '<strong>Could not reach backend. Please try again.</strong>';
+        }
+      });
+    })();
+  </script>
+
+  <script>
+    (function(){
+      const canvas = document.getElementById('dim-law-canvas');
+      const dimCanvas = document.getElementById('dim-dimension-canvas');
+      const stageText = document.getElementById('dim-law-stage');
+      if (!canvas || !stageText) return;
+      const ctx = canvas.getContext('2d');
+      const dimCtx = dimCanvas ? dimCanvas.getContext('2d') : null;
+      if (!ctx || !dimCtx) return;
+
+      const fib = [1,1,2,3,5,8,13];
+      const scale = 22; // fill bigger canvas while keeping fit
+      const sizes = fib.map(n => n * scale);
+      const positions = [];
+      // Standard Fibonacci tiling placement
+      positions[0] = { x: 0, y: 0 };
+      positions[1] = { x: sizes[0], y: 0 }; // to the right
+      positions[2] = { x: 0, y: -sizes[2] }; // above the first two
+      positions[3] = { x: -sizes[3], y: -sizes[2] }; // to the left
+      positions[4] = { x: -sizes[3], y: -sizes[2] + sizes[3] }; // below
+      // place 6th (F6) to the right, aligned so its bottom matches the stack after F4
+      positions[5] = {
+        x: positions[4].x + sizes[4],
+        y: positions[4].y + sizes[4] - sizes[5]
+      };
+      // place 7th (F7) above the whole stack to keep the spiral clean
+      const minXBound = Math.min(positions[3].x, positions[4].x, positions[5].x);
+      const minYBound = Math.min(positions[2].y, positions[3].y, positions[5].y);
+      positions[6] = {
+        x: minXBound,
+        y: minYBound - sizes[6]
+      };
+
+      // Center them in canvas
+      const minX = Math.min(...positions.map((p, i) => p.x));
+      const minY = Math.min(...positions.map((p, i) => p.y));
+      const maxX = Math.max(...positions.map((p, i) => p.x + sizes[i]));
+      const maxY = Math.max(...positions.map((p, i) => p.y + sizes[i]));
+      const offsetX = (canvas.width - (maxX - minX)) / 2 - minX;
+      const offsetY = (canvas.height - (maxY - minY)) / 2 - minY;
+
+      const spiralSquares = sizes.map((s, i) => ({ size: s, x: positions[i].x + offsetX, y: positions[i].y + offsetY }));
+
+      const ops = ['spark', 'multiply', 'divide', 'multiply', 'divide', 'multiply', 'divide'];
+      const labels = [
+        '1 Spark — void (0D)',
+        '2 Divide — x (1D, multiply)',
+        '3 Organize — xy (2D, divide)',
+        '4 Identify — xy (2D area, multiply)',
+        '5 Assemble — xyz layer (divide)',
+        '6 Human — xyzm address (multiply)',
+        '7 Rest — one 4D point for the cube (divide)',
+        '8 Complete unit — 1 point in higher dimension (contains all below)'
+      ];
+      const colors = ['#00c8ff', '#00d4ff', '#34e0ff', '#6ce0a8', '#a6e06c', '#ffb347', '#ff8a00', '#8fff8f'];
+
+      let currentStage = -1; // none placed until user presses
+      const stageButtons = Array.from(document.querySelectorAll('button[data-step]'));
+
+      function drawGrid() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+        for (let x = 20; x < canvas.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+        for (let y = 20; y < canvas.height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+      }
+
+      function drawDimGrid() {
+        dimCtx.clearRect(0, 0, dimCanvas.width, dimCanvas.height);
+        dimCtx.strokeStyle = 'rgba(255,255,255,0.08)'; dimCtx.lineWidth = 1;
+        for (let x = 20; x < dimCanvas.width; x += 40) { dimCtx.beginPath(); dimCtx.moveTo(x, 0); dimCtx.lineTo(x, dimCanvas.height); dimCtx.stroke(); }
+        for (let y = 20; y < dimCanvas.height; y += 40) { dimCtx.beginPath(); dimCtx.moveTo(0, y); dimCtx.lineTo(dimCanvas.width, y); dimCtx.stroke(); }
+      }
+
+      function hexToRgba(hex, alpha = 1) {
+        const normalized = hex.replace('#', '');
+        const bigint = parseInt(normalized, 16);
+        if (normalized.length === 3) {
+          const r = (bigint >> 8) & 15; const g = (bigint >> 4) & 15; const b = bigint & 15;
+          return `rgba(${r * 17}, ${g * 17}, ${b * 17}, ${alpha})`;
+        }
+        const r = (bigint >> 16) & 255; const g = (bigint >> 8) & 255; const b = bigint & 255;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
+      function drawCube(cx, cy, size, color, alpha = 0.18, offsetScale = 0.28) {
+        const offset = size * offsetScale;
+        const x = cx - size / 2;
+        const y = cy - size / 2;
+        const topX = x + offset;
+        const topY = y - offset;
+
+        // top square
+        dimCtx.fillStyle = hexToRgba(color, alpha + 0.07);
+        dimCtx.strokeStyle = color;
+        dimCtx.lineWidth = 2;
+        dimCtx.beginPath();
+        dimCtx.rect(topX, topY, size, size);
+        dimCtx.fill();
+        dimCtx.stroke();
+
+        // front square
+        dimCtx.fillStyle = hexToRgba(color, alpha);
+        dimCtx.beginPath();
+        dimCtx.rect(x, y, size, size);
+        dimCtx.fill();
+        dimCtx.stroke();
+
+        // connectors
+        dimCtx.beginPath();
+        dimCtx.moveTo(x, y);
+        dimCtx.lineTo(topX, topY);
+        dimCtx.moveTo(x + size, y);
+        dimCtx.lineTo(topX + size, topY);
+        dimCtx.moveTo(x, y + size);
+        dimCtx.lineTo(topX, topY + size);
+        dimCtx.moveTo(x + size, y + size);
+        dimCtx.lineTo(topX + size, topY + size);
+        dimCtx.stroke();
+      }
+
+      function drawTesseract(cx, cy, size, color, innerColor = '#8fff8f') {
+        const offset = size * 0.24;
+        const half = size / 2;
+        const front = { x: cx - half, y: cy - half, s: size };
+        const back = { x: front.x + offset, y: front.y - offset, s: size };
+
+        // faces
+        dimCtx.strokeStyle = hexToRgba(color, 0.95);
+        dimCtx.lineWidth = 2.2;
+        dimCtx.fillStyle = hexToRgba(color, 0.08);
+        dimCtx.beginPath();
+        dimCtx.rect(front.x, front.y, front.s, front.s);
+        dimCtx.fill();
+        dimCtx.stroke();
+        dimCtx.beginPath();
+        dimCtx.rect(back.x, back.y, back.s, back.s);
+        dimCtx.fill();
+        dimCtx.stroke();
+
+        // connectors between corresponding corners
+        const corners = [
+          [front.x, front.y, back.x, back.y],
+          [front.x + front.s, front.y, back.x + back.s, back.y],
+          [front.x, front.y + front.s, back.x, back.y + back.s],
+          [front.x + front.s, front.y + front.s, back.x + back.s, back.y + back.s]
+        ];
+        dimCtx.strokeStyle = hexToRgba(color, 0.9);
+        dimCtx.lineWidth = 1.8;
+        corners.forEach(([fx, fy, bx, by]) => {
+          dimCtx.beginPath();
+          dimCtx.moveTo(fx, fy);
+          dimCtx.lineTo(bx, by);
+          dimCtx.stroke();
+        });
+
+        // nested cube inside
+        drawCube(cx, cy, size * 0.56, innerColor, 0.12, 0.2);
+      }
+
+      function renderDimensionStage(t = 0) {
+        drawDimGrid();
+        const cx = dimCanvas.width / 2;
+        const cy = dimCanvas.height / 2 + 8;
+        const baseSize = 110;
+        const glow = 6 + 3 * Math.sin(t * 3);
+        const color = colors[currentStage] || '#00ff88';
+
+        dimCtx.font = '13px Inter, sans-serif';
+        dimCtx.textAlign = 'center';
+        dimCtx.textBaseline = 'middle';
+
+        if (currentStage < 0) {
+          dimCtx.fillStyle = '#cfe9ff';
+          dimCtx.fillText('Pick a beat to build the dimension model.', cx, cy);
+          return;
+        }
+
+        switch (currentStage) {
+          case 0: { // void / spark
+            dimCtx.strokeStyle = hexToRgba(color, 0.4);
+            dimCtx.lineWidth = 2;
+            dimCtx.beginPath();
+            dimCtx.arc(cx, cy, baseSize * 0.32, 0, Math.PI * 2);
+            dimCtx.stroke();
+            dimCtx.fillStyle = '#fff';
+            dimCtx.beginPath();
+            dimCtx.arc(cx, cy, glow, 0, Math.PI * 2);
+            dimCtx.fill();
+            dimCtx.fillStyle = '#cfe9ff';
+            dimCtx.fillText('0D spark', cx, cy + baseSize * 0.42);
+            break;
+          }
+          case 1: { // line (1D)
+            dimCtx.strokeStyle = color;
+            dimCtx.lineWidth = 3;
+            dimCtx.beginPath();
+            dimCtx.moveTo(cx - baseSize * 0.45, cy);
+            dimCtx.lineTo(cx + baseSize * 0.45, cy);
+            dimCtx.stroke();
+            dimCtx.fillStyle = '#fff';
+            dimCtx.beginPath();
+            dimCtx.arc(cx, cy, glow, 0, Math.PI * 2);
+            dimCtx.fill();
+            dimCtx.fillStyle = '#cfe9ff';
+            dimCtx.fillText('1D line', cx, cy + baseSize * 0.42);
+            break;
+          }
+          case 2: { // add width (xy)
+            dimCtx.strokeStyle = hexToRgba(color, 0.9);
+            dimCtx.lineWidth = 3;
+            dimCtx.beginPath();
+            dimCtx.moveTo(cx - baseSize * 0.45, cy);
+            dimCtx.lineTo(cx + baseSize * 0.45, cy);
+            dimCtx.stroke();
+            dimCtx.beginPath();
+            dimCtx.moveTo(cx, cy - baseSize * 0.35);
+            dimCtx.lineTo(cx, cy + baseSize * 0.35);
+            dimCtx.stroke();
+            dimCtx.fillStyle = '#fff';
+            dimCtx.beginPath();
+            dimCtx.arc(cx, cy, glow, 0, Math.PI * 2);
+            dimCtx.fill();
+            dimCtx.fillStyle = '#cfe9ff';
+            dimCtx.fillText('2D axes', cx, cy + baseSize * 0.42);
+            break;
+          }
+          case 3: { // plane
+            const sz = baseSize * 0.9;
+            const x = cx - sz / 2;
+            const y = cy - sz / 2;
+            dimCtx.fillStyle = hexToRgba(color, 0.18);
+            dimCtx.strokeStyle = color;
+            dimCtx.lineWidth = 2.5;
+            dimCtx.fillRect(x, y, sz, sz);
+            dimCtx.strokeRect(x, y, sz, sz);
+            dimCtx.fillStyle = '#cfe9ff';
+            dimCtx.fillText('2D plane (area)', cx, cy + sz / 2 + 16);
+            break;
+          }
+          case 4: { // cube layer
+            drawCube(cx, cy, baseSize * 0.95, color, 0.16, 0.24);
+            dimCtx.fillStyle = '#cfe9ff';
+            dimCtx.fillText('3D layer (one z)', cx, cy + baseSize * 0.55);
+            break;
+          }
+          case 5: { // cube with m axis (address)
+            drawCube(cx, cy + 6, baseSize * 0.95, color, 0.2, 0.28);
+            dimCtx.strokeStyle = hexToRgba(color, 0.9);
+            dimCtx.lineWidth = 2.5;
+            dimCtx.beginPath();
+            dimCtx.moveTo(cx + baseSize * 0.5, cy - baseSize * 0.55);
+            dimCtx.lineTo(cx + baseSize * 0.5, cy - baseSize * 0.85);
+            dimCtx.stroke();
+            dimCtx.beginPath();
+            dimCtx.arc(cx + baseSize * 0.5, cy - baseSize * 0.95, glow * 0.8 + 2, 0, Math.PI * 2);
+            dimCtx.fillStyle = '#fff';
+            dimCtx.fill();
+            dimCtx.fillStyle = '#cfe9ff';
+            dimCtx.fillText('Address along m (4th)', cx, cy + baseSize * 0.55);
+            break;
+          }
+          case 6: { // interlaced cubes
+            drawCube(cx - 18, cy + 8, baseSize * 0.88, colors[4] || '#6ce0a8', 0.16, 0.24);
+            drawCube(cx + 22, cy - 12, baseSize * 0.88, color, 0.2, 0.3);
+            dimCtx.strokeStyle = '#fff';
+            dimCtx.lineWidth = 2;
+            dimCtx.beginPath();
+            dimCtx.arc(cx + baseSize * 0.22, cy - baseSize * 0.22, glow * 0.7 + 2, 0, Math.PI * 2);
+            dimCtx.stroke();
+            dimCtx.fillStyle = '#cfe9ff';
+            dimCtx.fillText('Interlaced cubes, one address', cx, cy + baseSize * 0.55);
+            break;
+          }
+          case 7: { // single 4D point
+            drawTesseract(cx, cy + 4, baseSize * 1.05, '#59ff9a');
+            dimCtx.fillStyle = '#fff';
+            dimCtx.beginPath();
+            dimCtx.arc(cx, cy - baseSize * 0.58, glow + 4, 0, Math.PI * 2);
+            dimCtx.fill();
+            dimCtx.strokeStyle = hexToRgba('#8fff8f', 0.9);
+            dimCtx.lineWidth = 2.2;
+            dimCtx.beginPath();
+            dimCtx.arc(cx, cy - baseSize * 0.58, glow + 9, 0, Math.PI * 2);
+            dimCtx.stroke();
+            dimCtx.fillStyle = '#cfe9ff';
+            dimCtx.fillText('Cube nested in a tesseract (4D)', cx, cy + baseSize * 0.58);
+            break;
+          }
+        }
+      }
+
+      function renderStage(t = 0) {
+        drawGrid();
+        for (let i = 0; i <= currentStage; i++) {
+          const sq = spiralSquares[i];
+          if (!sq) continue;
+          const color = colors[i] || '#00ff88';
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 3;
+          ctx.strokeRect(sq.x, sq.y, sq.size, sq.size);
+          ctx.fillStyle = `${color}22`;
+          ctx.fillRect(sq.x, sq.y, sq.size, sq.size);
+          ctx.fillStyle = '#0b0b16';
+          ctx.fillRect(sq.x + 6, sq.y + 6, sq.size - 12, sq.size - 12);
+          ctx.strokeStyle = `${color}aa`;
+          ctx.strokeRect(sq.x + 6, sq.y + 6, sq.size - 12, sq.size - 12);
+
+          ctx.fillStyle = color;
+          ctx.font = 'bold 18px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const numText = `${i + 1}`;
+          ctx.fillText(numText, sq.x + sq.size / 2, sq.y + sq.size / 2 - 8);
+          ctx.font = '12px Inter, sans-serif';
+          const opText = ops[i];
+          ctx.fillText(opText, sq.x + sq.size / 2, sq.y + sq.size / 2 + 12);
+        }
+
+        const pulse = 6 + 3 * Math.sin(t * 3);
+        const tipSq = spiralSquares[currentStage];
+        if (tipSq) {
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(tipSq.x + tipSq.size, tipSq.y + tipSq.size, pulse, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        stageText.textContent = currentStage >= 0 ? labels[currentStage] : 'Pick a step to place its square.';
+      }
+
+      function setStage(index) {
+        currentStage = Math.min(Math.max(index, 0), labels.length - 1);
+      }
+
+      stageButtons.forEach(btn => {
+        const idx = parseInt(btn.getAttribute('data-step'), 10);
+        const color = colors[idx] || '#00ff88';
+        btn.style.width = '66px';
+        btn.style.height = '42px';
+        btn.style.borderRadius = '10px';
+        btn.style.padding = '6px 10px';
+        btn.style.background = hexToRgba(color, 0.16);
+        btn.style.border = `1px solid ${hexToRgba(color, 0.8)}`;
+        btn.style.color = '#e8f6ff';
+        btn.style.fontWeight = '700';
+        btn.style.boxShadow = `0 0 10px ${hexToRgba(color, 0.35)}`;
+        btn.addEventListener('click', () => setStage(idx));
+      });
+
+      function animate(ts = 0) {
+        const t = ts / 1000;
+        renderStage(t);
+        renderDimensionStage(t);
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+  </script>
+{% endblock %}
